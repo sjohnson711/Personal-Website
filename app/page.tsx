@@ -1,65 +1,175 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import ArticleCard from "@/components/ArticleCard";
 
-export default function Home() {
+async function getLatestArticles() {
+  return prisma.article.findMany({
+    where: { published: true },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+    select: { title: true, slug: true, excerpt: true, createdAt: true },
+  });
+}
+
+export default async function HomePage() {
+  const latest = await getLatestArticles();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="max-w-5xl mx-auto px-6 py-16 flex flex-col gap-20">
+      {/* Hero */}
+      <section className="flex flex-col items-center text-center gap-8">
+        <div
+          className="glass-card px-8 py-12 flex flex-col items-center gap-6"
+          style={{ maxWidth: "680px", width: "100%" }}
+        >
+          {/* Book cover placeholder */}
+          <div
+            style={{
+              width: "160px",
+              height: "220px",
+              backgroundColor: "rgba(33, 115, 70, 0.25)",
+              border: "2px dashed rgba(64, 145, 108, 0.5)",
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#40916c",
+              fontSize: "0.8rem",
+              letterSpacing: "0.05em",
+            }}
+          >
+            BOOK COVER
+          </div>
+
+          <h1
+            className="font-serif text-4xl font-bold leading-tight"
+            style={{ color: "#fbbf24" }}
+          >
+            [Book Title]
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p
+            style={{
+              color: "#fff7ed",
+              fontSize: "1.1rem",
+              lineHeight: 1.75,
+              maxWidth: "520px",
+            }}
+          >
+            [A compelling one-to-two sentence description of the book that draws
+            readers in and makes them want to learn more. Replace this with your
+            real synopsis.]
           </p>
+
+          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
+            <a
+              href="#"
+              style={{
+                padding: "0.75rem 2rem",
+                borderRadius: "0.5rem",
+                backgroundColor: "#217346",
+                color: "#fff7ed",
+                fontWeight: 700,
+                textDecoration: "none",
+                fontSize: "1rem",
+              }}
+            >
+              Pre-order Now
+            </a>
+            <Link
+              href="/about"
+              style={{
+                padding: "0.75rem 2rem",
+                borderRadius: "0.5rem",
+                border: "1px solid rgba(64, 145, 108, 0.6)",
+                color: "#fff7ed",
+                fontWeight: 600,
+                textDecoration: "none",
+                fontSize: "1rem",
+              }}
+            >
+              About the Author
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </section>
+
+      {/* Latest Articles */}
+      {latest.length > 0 && (
+        <section className="flex flex-col gap-6">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <h2
+              className="font-serif text-2xl font-bold"
+              style={{ color: "#fbbf24" }}
+            >
+              Latest Articles
+            </h2>
+            <Link
+              href="/articles"
+              style={{ color: "#40916c", fontSize: "0.9rem", textDecoration: "none" }}
+            >
+              View all →
+            </Link>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "1.5rem",
+            }}
           >
-            Documentation
-          </a>
+            {latest.map((article) => (
+              <ArticleCard key={article.slug} {...article} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Newsletter placeholder */}
+      <section className="glass-card p-10 text-center flex flex-col items-center gap-4">
+        <h2 className="font-serif text-2xl font-bold" style={{ color: "#fbbf24" }}>
+          Stay in the Loop
+        </h2>
+        <p style={{ color: "#fff7ed", maxWidth: "440px" }}>
+          Get new articles delivered to your inbox every week. No spam, ever.
+        </p>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", justifyContent: "center" }}>
+          <input
+            type="email"
+            placeholder="your@email.com"
+            style={{
+              padding: "0.65rem 1rem",
+              borderRadius: "0.5rem",
+              border: "1px solid rgba(64, 145, 108, 0.5)",
+              backgroundColor: "rgba(10, 5, 0, 0.5)",
+              color: "#fff7ed",
+              fontSize: "1rem",
+              minWidth: "240px",
+            }}
+          />
+          <button
+            style={{
+              padding: "0.65rem 1.5rem",
+              borderRadius: "0.5rem",
+              backgroundColor: "#217346",
+              color: "#fff7ed",
+              fontWeight: 700,
+              border: "none",
+              cursor: "pointer",
+              fontSize: "1rem",
+            }}
+          >
+            Subscribe
+          </button>
         </div>
-      </main>
+      </section>
     </div>
   );
 }

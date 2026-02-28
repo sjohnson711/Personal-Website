@@ -1,26 +1,104 @@
 @import "tailwindcss";
 
+@theme {
+  /* Sunset palette */
+  --color-sunset-amber: #fbbf24;
+  --color-sunset-green: #217346;
+  --color-sunset-purple: #7c3aed;
+
+  /* Forest green accents */
+  --color-forest: #2d6a4f;
+  --color-forest-light: #40916c;
+  --color-forest-dark: #1b4332;
+
+  /* Neutrals */
+  --color-cream: #fff7ed;
+  --color-warm-muted: #a89070;
+
+  /* Typography */
+  --font-serif: Georgia, Cambria, "Times New Roman", serif;
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-gradient: linear-gradient(
+    145deg,
+    #fbbf24 0%,
+    #217346 45%,
+    #4c1d95 100%
+  );
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: #fff7ed;
+  font-family: var(--font-sans);
+}
+
+/* Frosted glass card utility */
+.glass-card {
+  background: rgba(10, 5, 0, 0.62);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(64, 145, 108, 0.3);
+  border-radius: 0.75rem;
+}
+
+/* Prose styles for article content */
+.prose-sunset h1,
+.prose-sunset h2,
+.prose-sunset h3 {
+  color: #fbbf24;
+  font-family: Georgia, serif;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-sunset p {
+  color: #fff7ed;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.prose-sunset a {
+  color: #40916c;
+  text-decoration: underline;
+}
+
+.prose-sunset blockquote {
+  border-left: 4px solid #217346;
+  padding-left: 1rem;
+  color: #a89070;
+  font-style: italic;
+}
+
+.prose-sunset code {
+  background: rgba(33, 115, 70, 0.2);
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.prose-sunset ul,
+.prose-sunset ol {
+  color: #fff7ed;
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.prose-sunset li {
+  margin-bottom: 0.4rem;
 }
