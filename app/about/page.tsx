@@ -59,7 +59,7 @@ export default function AboutPage() {
           >
             Seth Johnson
           </h2>
-
+``
           <p style={{ color: "#fff7ed", lineHeight: 1.8 }}>
             Seth Johnson is a Software Engineer | Mental Health Therapist with a passion for educating kids from impoverished communities.
             Born and raised in Georgia, they have spent the past 10 years
