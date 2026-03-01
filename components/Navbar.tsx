@@ -16,7 +16,7 @@ export default function Navbar() {
     <nav
       className="sticky top-0 z-50"
       style={{
-        backgroundColor: "rgba(27, 67, 50, 0.92)",
+        backgroundColor: "rgba(64, 145, 108, 0.88)",
         backdropFilter: "blur(12px)",
         borderBottom: "1px solid rgba(64, 145, 108, 0.4)",
       }}
@@ -24,8 +24,8 @@ export default function Navbar() {
       <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link
           href="/"
-          className="font-serif text-xl font-bold tracking-wide"
-          style={{ color: "#fbbf24" }}
+          className="font-serif text-xl font-bold tracking-widest uppercase"
+          style={{ color: "#ffffff", letterSpacing: "0.12em" }}
         >
           [Author Name]
         </Link>

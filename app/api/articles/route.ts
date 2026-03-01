@@ -6,6 +6,7 @@ import { getPaginationParams, getTotalPages } from "@/lib/pagination";
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const pageParam = searchParams.get("page") ?? "1";
+  // Pass ?admin=true to include drafts (requires valid session)
   const adminMode = searchParams.get("admin") === "true";
 
   const session = adminMode ? await auth() : null;
@@ -13,6 +14,7 @@ export async function GET(request: NextRequest) {
 
   const { page, skip, take } = getPaginationParams({ page: pageParam });
 
+  // Unauthenticated requests only see published articles
   const whereClause = isAdmin ? {} : { published: true };
 
   const [articles, total] = await Promise.all([

@@ -10,6 +10,7 @@ export async function GET(_req: NextRequest, { params }: RouteContext) {
   const { id } = await params;
   const numericId = parseInt(id, 10);
 
+  // Accepts either a numeric ID or a slug string
   const article = isNaN(numericId)
     ? await prisma.article.findUnique({ where: { slug: id } })
     : await prisma.article.findUnique({ where: { id: numericId } });

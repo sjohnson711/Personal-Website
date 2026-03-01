@@ -79,8 +79,9 @@ book-site/
 │   ├── schema.prisma                      ← Article + Admin models
 │   └── seed.ts                            ← Seeds admin account + 3 sample articles
 │
-├── auth.ts                                ← NextAuth v5 config (credentials provider, JWT)
-├── middleware.ts                          ← Protects all /admin/* routes
+├── auth.config.ts                         ← Edge-safe NextAuth config (no Prisma)
+├── auth.ts                                ← Full NextAuth (credentials + Prisma, Node.js only)
+├── proxy.ts                               ← Next.js 16 edge proxy, protects /admin/* routes
 ├── prisma.config.ts                       ← Prisma v7 config (reads DATABASE_URL)
 ├── jest.config.ts                         ← Jest config via next/jest
 ├── .env                                   ← DATABASE_URL + NEXTAUTH_SECRET (fill in)
@@ -97,17 +98,19 @@ book-site/
 
 ### Prisma v7
 - Generator is `prisma-client` (not `prisma-client-js`).
-- Client is generated to `app/generated/prisma/`.
-- Always import from `@/app/generated/prisma`, **not** `@prisma/client`.
+- Client is generated to `app/generated/prisma/`. Run `npx prisma generate` after schema changes.
+- Always import from `@/app/generated/prisma/client`, **not** `@prisma/client` or bare `@/app/generated/prisma` (no index.ts).
+- `url` is NOT in `schema.prisma`. Requires `@prisma/adapter-pg` + `pg` packages. Instantiate with `new PrismaPg({ connectionString: process.env.DATABASE_URL! })` passed as `adapter` to `new PrismaClient({ adapter })`.
+- Seeds require `import "dotenv/config"` since they run outside Next.js.
 
 ### Tailwind v4
 - No `tailwind.config.ts`. All theme customization lives in `app/globals.css`
   inside the `@theme {}` block.
 
 ### NextAuth v5
-- Config is in `auth.ts` at the project root.
-- API route at `app/api/auth/[...nextauth]/route.ts` just re-exports `handlers`.
-- Middleware at `middleware.ts` re-exports `auth` and matches `/admin/:path*`.
+- **Edge-safe split**: `auth.config.ts` holds session/pages/authorized callback (no Node.js deps). `auth.ts` spreads authConfig and adds the Credentials provider with Prisma.
+- `proxy.ts` (Next.js 16 replaces `middleware.ts`) imports from `auth.config.ts` only — safe for Edge Runtime.
+- API route at `app/api/auth/[...nextauth]/route.ts` just re-exports `handlers` from `auth.ts`.
 - Strategy is `jwt` — no database adapter needed.
 
 ### Secret Login
@@ -145,32 +148,19 @@ book-site/
 
 ### 1. Provision a PostgreSQL database
 
-Use one of these free/cheap options:
-- **Neon** (neon.tech) — free serverless Postgres, easiest for Vercel
-- **Supabase** (supabase.com) — free tier, generous limits
-- **Railway** (railway.app) — simple, $5/month hobby plan
-- **Local** — install PostgreSQL locally if you prefer
-
-Copy the connection string. It looks like:
-```
-postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
-```
+**DONE** — Local PostgreSQL installed and configured.
+- User: `postgres`
+- Database: `book_site` (created by Prisma migrate)
 
 ### 2. Fill in the .env file
 
-Open `.env` and replace the placeholders:
+**DONE** — `.env` is fully configured:
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/book_site?schema=public"
-NEXTAUTH_SECRET="generate-a-random-string-at-least-32-chars"
+DATABASE_URL="postgresql://postgres:Ilovewillie1!@localhost:5432/book_site?schema=public"
+NEXTAUTH_SECRET="RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU="
 NEXTAUTH_URL="http://localhost:3000"
 ```
-
-To generate a secure `NEXTAUTH_SECRET`, run:
-```bash
-openssl rand -base64 32
-```
-Or use: https://generate-secret.vercel.app/32
 
 ### 3. Run the database migration
 

@@ -22,12 +22,7 @@
 }
 
 :root {
-  --bg-gradient: linear-gradient(
-    145deg,
-    #fbbf24 0%,
-    #217346 45%,
-    #4c1d95 100%
-  );
+  --bg-color: #f5f0e8;
 }
 
 * {
@@ -42,9 +37,8 @@ body {
 }
 
 body {
-  background: var(--bg-gradient);
-  background-attachment: fixed;
-  color: #fff7ed;
+  background: var(--bg-color);
+  color: #1a1a1a;
   font-family: var(--font-sans);
 }
 
@@ -55,6 +49,12 @@ body {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(64, 145, 108, 0.3);
   border-radius: 0.75rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
 }
 
 /* Prose styles for article content */

@@ -44,10 +44,12 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
   const [excerpt, setExcerpt] = useState(initialData?.excerpt ?? "");
   const [content, setContent] = useState(initialData?.content ?? "");
   const [published, setPublished] = useState(initialData?.published ?? false);
+  // In edit mode the slug is already set; stop auto-generating so it isn't overwritten
   const [slugEdited, setSlugEdited] = useState(mode === "edit");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  // Auto-generate slug from title until the user manually edits the slug field
   useEffect(() => {
     if (!slugEdited) {
       setSlug(generateSlug(title));

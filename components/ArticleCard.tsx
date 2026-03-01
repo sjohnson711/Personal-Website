@@ -22,10 +22,7 @@ export default function ArticleCard({
   createdAt,
 }: ArticleCardProps) {
   return (
-    <article
-      className="glass-card p-6 flex flex-col gap-3 hover:scale-[1.01] transition-transform"
-      style={{ transition: "transform 0.2s, box-shadow 0.2s" }}
-    >
+    <article className="glass-card p-6 flex flex-col gap-3">
       <time
         dateTime={new Date(createdAt).toISOString()}
         style={{ color: "#40916c", fontSize: "0.8rem", letterSpacing: "0.05em" }}
@@ -35,7 +32,7 @@ export default function ArticleCard({
 
       <h2
         className="font-serif text-xl font-bold leading-snug"
-        style={{ color: "#fbbf24" }}
+        style={{ color: "#e8d5b0" }}
       >
         <Link
           href={`/articles/${slug}`}
