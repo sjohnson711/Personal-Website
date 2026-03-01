@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About [Author Name] — [Book Title]",
+  title: "About Seth Johnson — [Book Title]",
   description:
     "Learn about [Author Name], the author of [Book Title]. Background, influences, and the story behind the book.",
 };
@@ -57,13 +57,13 @@ export default function AboutPage() {
             className="font-serif text-2xl font-bold"
             style={{ color: "#fbbf24" }}
           >
-            [Author Name]
+            Seth Johnson
           </h2>
 
           <p style={{ color: "#fff7ed", lineHeight: 1.8 }}>
-            [Author Name] is a [profession/title] with a passion for [topic].
-            Born and raised in [location], they have spent the past [X] years
-            [brief background sentence describing their journey or expertise].
+            Seth Johnson is a Software Engineer | Mental Health Therapist with a passion for educating kids from impoverished communities.
+            Born and raised in Georgia, they have spent the past 10 years
+            in human services including being a former Residential Director for formerly known Carolina Youth and Development.
           </p>
 
           <p style={{ color: "#fff7ed", lineHeight: 1.8 }}>

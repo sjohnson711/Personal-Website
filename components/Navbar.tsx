@@ -27,7 +27,7 @@ export default function Navbar() {
           className="font-serif text-xl font-bold tracking-widest uppercase"
           style={{ color: "#ffffff", letterSpacing: "0.12em" }}
         >
-          [Author Name]
+          Seth Johnson
         </Link>
 
         <ul className="flex gap-8 list-none m-0 p-0">
