@@ -1,95 +1,122 @@
-# Book Site — Project Summary
+# Blog Site — Project Summary
 
-## What Was Built
+## Architecture
 
-A full-stack personal website for an upcoming book, built with Next.js 16 (App Router),
-Tailwind v4, Prisma v7, NextAuth v5, and PostgreSQL.
+This is a **decoupled full-stack application**:
+- `frontend/` — Vite + React 19, TypeScript, Tailwind v4, React Router v7
+- `backend/` — Express 4, TypeScript, Prisma v7, PostgreSQL
+
+The frontend proxies all `/api/*` requests to the backend in dev (via `vite.config.ts`).
 
 ---
 
 ## Tech Stack
 
-| Layer         | Technology                          |
-|---------------|-------------------------------------|
-| Framework     | Next.js 16 (App Router, React 19)   |
-| Language      | TypeScript                          |
-| Styling       | Tailwind CSS v4 (CSS-based config)  |
-| Database ORM  | Prisma v7                           |
-| Database      | PostgreSQL                          |
-| Auth          | NextAuth v5 beta (JWT + Credentials)|
-| Markdown      | marked                              |
-| Slug gen      | slugify                             |
-| Testing       | Jest (34 tests, all passing)        |
+| Layer         | Technology                                      |
+|---------------|-------------------------------------------------|
+| Frontend      | React 19, Vite 6, TypeScript, Tailwind CSS v4   |
+| Backend       | Express 4, TypeScript, tsx                      |
+| Database ORM  | Prisma v7                                       |
+| Database      | PostgreSQL                                      |
+| Auth          | JWT (httpOnly cookie) + bcryptjs                |
+| Markdown      | marked                                          |
+| Slug gen      | slugify                                         |
 
 ---
 
 ## Color Design
 
-| Role                  | Color   | Hex       |
-|-----------------------|---------|-----------|
-| Gradient start        | Amber   | `#FBBF24` |
-| Gradient mid          | Excel green (IDE trim) | `#217346` |
-| Gradient end          | Purple  | `#7C3AED` |
-| Accent / buttons      | Forest green | `#40916C` |
-| Navbar background     | Dark forest | `rgba(27,67,50,0.92)` |
-| Primary text          | Cream   | `#FFF7ED` |
-| Muted text            | Warm tan | `#A89070` |
+| Role                  | Color              | Hex                    |
+|-----------------------|--------------------|------------------------|
+| Gradient / Headings   | Amber              | `#FBBF24`              |
+| Accent / buttons      | Forest green       | `#40916C`              |
+| Primary button BG     | Dark forest        | `#217346`              |
+| Navbar background     | Dark forest        | `rgba(27,67,50,0.95)`  |
+| Primary text          | Cream              | `#FFF7ED`              |
+| Muted text            | Warm tan           | `#A89070`              |
+| Cards                 | Frosted dark       | `rgba(10,5,0,0.62)`    |
 
-The gradient is a fixed full-page background. Content sits on top in
-frosted glass cards (`.glass-card` utility class in `app/globals.css`).
+All theme tokens live in `frontend/src/index.css` inside `@theme {}`. The `.glass-card` utility and `.prose-sunset` markdown styles are also defined there.
 
 ---
 
 ## File Structure
 
 ```
-book-site/
-├── app/
-│   ├── globals.css                        ← Tailwind v4 theme + sunset gradient + glass-card
-│   ├── layout.tsx                         ← Root layout with Navbar + footer
-│   ├── page.tsx                           ← Home: book hero, latest articles, newsletter CTA
-│   ├── about/page.tsx                     ← Bio page (placeholders)
-│   ├── articles/
-│   │   ├── page.tsx                       ← Paginated article list (7 per page)
-│   │   └── [slug]/page.tsx               ← Individual article (markdown rendered)
-│   ├── gateway/page.tsx                   ← Secret admin login (not linked publicly)
-│   ├── admin/
-│   │   ├── dashboard/page.tsx             ← Article manager (stats, list, delete)
-│   │   ├── articles/
-│   │   │   ├── new/page.tsx              ← Write a new article
-│   │   │   └── [id]/edit/page.tsx        ← Edit an existing article
-│   └── api/
-│       ├── auth/[...nextauth]/route.ts    ← NextAuth handler
-│       ├── articles/route.ts              ← GET (paginated) + POST
-│       └── articles/[id]/route.ts        ← GET + PUT + DELETE
-│
+frontend/src/
 ├── components/
-│   ├── Navbar.tsx                         ← Sticky nav with active link highlighting
-│   ├── ArticleCard.tsx                    ← Card used on home + articles list
-│   ├── Pagination.tsx                     ← Page 1/2/3 nav, shows only when > 1 page
-│   ├── ArticleEditor.tsx                  ← New/edit form with auto-slug generation
-│   └── AdminArticleRow.tsx                ← Dashboard row with edit + delete
-│
+│   ├── Navbar.tsx           ← Sticky nav; shows Dashboard + Sign Out when admin is logged in
+│   ├── ArticleCard.tsx      ← Card used on home + articles list
+│   ├── ArticleEditor.tsx    ← New/edit form with auto-slug generation
+│   ├── AdminArticleRow.tsx  ← Dashboard row with edit + delete
+│   ├── CommentSection.tsx   ← Reader message list + submission form
+│   ├── Pagination.tsx       ← Page nav (shows only when >1 page)
+│   └── ProtectedRoute.tsx   ← Redirects to /gateway if not authenticated
+├── context/
+│   └── AuthContext.tsx      ← JWT auth state (email, loading, login, logout)
+├── pages/
+│   ├── HomePage.tsx         ← Hero, latest 3 articles, newsletter CTA
+│   ├── AboutPage.tsx        ← Author bio
+│   ├── ArticlesPage.tsx     ← Paginated article list (7 per page)
+│   ├── ArticlePage.tsx      ← Single article with markdown + CommentSection
+│   ├── GatewayPage.tsx      ← Secret admin login (not publicly linked)
+│   ├── NotFoundPage.tsx     ← 404 page
+│   └── admin/
+│       ├── DashboardPage.tsx   ← Stats + article list with edit/delete
+│       ├── NewArticlePage.tsx  ← Wraps ArticleEditor in new mode
+│       └── EditArticlePage.tsx ← Fetches article by id, wraps ArticleEditor in edit mode
+└── lib/
+    └── slug.ts              ← generateSlug() using slugify
+
+backend/src/
+├── routes/
+│   ├── articles.ts   ← GET (paginated + admin mode), GET/:id, POST, PUT, DELETE
+│   ├── auth.ts       ← POST /login, POST /logout, GET /me
+│   └── comments.ts   ← GET /:articleId, POST /:articleId
+├── middleware/
+│   └── requireAuth.ts  ← JWT cookie middleware (requireAuth + getOptionalAuth)
 ├── lib/
-│   ├── prisma.ts                          ← Prisma singleton (imports from app/generated/prisma)
-│   ├── pagination.ts                      ← ARTICLES_PER_PAGE=7, getPaginationParams, getTotalPages
-│   └── slug.ts                            ← generateSlug() using slugify
-│
-├── prisma/
-│   ├── schema.prisma                      ← Article + Admin models
-│   └── seed.ts                            ← Seeds admin account + 3 sample articles
-│
-├── auth.config.ts                         ← Edge-safe NextAuth config (no Prisma)
-├── auth.ts                                ← Full NextAuth (credentials + Prisma, Node.js only)
-├── proxy.ts                               ← Next.js 16 edge proxy, protects /admin/* routes
-├── prisma.config.ts                       ← Prisma v7 config (reads DATABASE_URL)
-├── jest.config.ts                         ← Jest config via next/jest
-├── .env                                   ← DATABASE_URL + NEXTAUTH_SECRET (fill in)
-│
-└── __tests__/
-    ├── lib/pagination.test.ts             ← 12 tests: page math, clamping, edge cases
-    ├── lib/slug.test.ts                   ← 8 tests: slug generation
-    └── api/articles.test.ts              ← 14 tests: all CRUD routes, auth guards, 409/404
+│   ├── prisma.ts       ← Prisma singleton (PrismaPg adapter)
+│   └── pagination.ts   ← ARTICLES_PER_PAGE=7, getPaginationParams, getTotalPages
+└── index.ts            ← Express entry; registers all routers + CORS + cookie-parser
+
+backend/prisma/
+├── schema.prisma   ← Article, Comment, Admin models
+├── migrations/     ← SQL migration history
+└── seed.ts         ← Seeds admin account + 3 sample articles
+```
+
+---
+
+## Data Models
+
+```prisma
+model Article {
+  id        Int       @id @default(autoincrement())
+  title     String
+  slug      String    @unique
+  excerpt   String
+  content   String    // Markdown
+  published Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  comments  Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  articleId Int
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  name      String
+  body      String
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String // bcrypt hashed
+}
 ```
 
 ---
@@ -98,139 +125,103 @@ book-site/
 
 ### Prisma v7
 - Generator is `prisma-client` (not `prisma-client-js`).
-- Client is generated to `app/generated/prisma/`. Run `npx prisma generate` after schema changes.
-- Always import from `@/app/generated/prisma/client`, **not** `@prisma/client` or bare `@/app/generated/prisma` (no index.ts).
-- `url` is NOT in `schema.prisma`. Requires `@prisma/adapter-pg` + `pg` packages. Instantiate with `new PrismaPg({ connectionString: process.env.DATABASE_URL! })` passed as `adapter` to `new PrismaClient({ adapter })`.
-- Seeds require `import "dotenv/config"` since they run outside Next.js.
+- Client generated to `backend/src/generated/prisma/`.
+- Always import from `../generated/prisma/client`.
+- No `url` in `schema.prisma` — uses `PrismaPg` adapter passed to `PrismaClient`.
+- Run `npx prisma generate` after schema changes.
 
 ### Tailwind v4
-- No `tailwind.config.ts`. All theme customization lives in `app/globals.css`
-  inside the `@theme {}` block.
+- No `tailwind.config.ts`. All customization is in `frontend/src/index.css` inside `@theme {}`.
 
-### NextAuth v5
-- **Edge-safe split**: `auth.config.ts` holds session/pages/authorized callback (no Node.js deps). `auth.ts` spreads authConfig and adds the Credentials provider with Prisma.
-- `proxy.ts` (Next.js 16 replaces `middleware.ts`) imports from `auth.config.ts` only — safe for Edge Runtime.
-- API route at `app/api/auth/[...nextauth]/route.ts` just re-exports `handlers` from `auth.ts`.
-- Strategy is `jwt` — no database adapter needed.
+### Auth Flow
+- Admin logs in at `/gateway` → POST `/api/auth/login` → sets `httpOnly` JWT cookie (7 days).
+- `AuthContext` hydrates from `GET /api/auth/me` on mount.
+- `ProtectedRoute` wraps all `/admin/*` routes — redirects to `/gateway` if not logged in.
+- `requireAuth` middleware reads cookie or `Authorization: Bearer` header.
+
+### Comments
+- Public — no auth required to post.
+- Validated: name ≤ 100 chars, body ≤ 2000 chars, article must be published.
+- Deleted automatically (cascade) when the parent article is deleted.
 
 ### Secret Login
-- The admin login page lives at `/gateway`.
-- It is **not linked anywhere** in the public UI.
-- After login, the admin is redirected to `/admin/dashboard`.
-
-### Pagination
-- Defined in `lib/pagination.ts` — change `ARTICLES_PER_PAGE` there to adjust.
-- Invalid/non-numeric page params safely fall back to page 1.
-
-### Article Content
-- Written in Markdown in the admin editor.
-- Rendered via `marked` on the article detail page.
-- Styled with the `.prose-sunset` CSS class in `globals.css`.
+- `/gateway` is not linked anywhere in the public nav.
+- On success, redirects to `/admin/dashboard`.
 
 ---
 
 ## npm Scripts
 
-| Command               | What it does                              |
-|-----------------------|-------------------------------------------|
-| `npm run dev`         | Start development server                  |
-| `npm run build`       | Production build                          |
-| `npm run start`       | Start production server                   |
-| `npm test`            | Run all 34 tests                          |
-| `npm run test:watch`  | Run tests in watch mode                   |
-| `npm run test:coverage` | Run tests with coverage report          |
-| `npm run db:push`     | Run Prisma migrations                     |
-| `npm run db:seed`     | Seed admin account + sample articles      |
+### Backend (`backend/`)
+
+| Command             | What it does                      |
+|---------------------|-----------------------------------|
+| `npm run dev`       | Start dev server with tsx watch   |
+| `npm run build`     | Compile TypeScript to `dist/`     |
+| `npm run start`     | Run compiled production server    |
+| `npm run db:push`   | Run Prisma migrations             |
+| `npm run db:seed`   | Seed admin account + sample data  |
+
+### Frontend (`frontend/`)
+
+| Command           | What it does                     |
+|-------------------|----------------------------------|
+| `npm run dev`     | Start Vite dev server            |
+| `npm run build`   | Production build to `dist/`      |
+| `npm run preview` | Preview production build locally |
 
 ---
 
-## Steps to Get It Running
+## Environment Variables
 
-### 1. Provision a PostgreSQL database
-
-**DONE** — Local PostgreSQL installed and configured.
-- User: `postgres`
-- Database: `book_site` (created by Prisma migrate)
-
-### 2. Fill in the .env file
-
-**DONE** — `.env` is fully configured:
+### `backend/.env`
 
 ```env
 DATABASE_URL="postgresql://postgres:Ilovewillie1!@localhost:5432/book_site?schema=public"
-NEXTAUTH_SECRET="RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU="
-NEXTAUTH_URL="http://localhost:3000"
+JWT_SECRET="RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU="
+PORT=3001
+FRONTEND_URL="http://localhost:5173"
 ```
-
-### 3. Run the database migration
-
-```bash
-npx prisma migrate dev --name init
-```
-
-This creates all tables (`Article`, `Admin`) in your database.
-
-### 4. Seed the database
-
-```bash
-npm run db:seed
-```
-
-This creates:
-- Admin account: `admin@yoursite.com` / password: `change-this-password`
-- 3 sample articles (2 published, 1 draft)
-
-**Change the password immediately** — update `prisma/seed.ts` before seeding,
-or log in and use the edit flow.
-
-### 5. Start the dev server
-
-```bash
-npm run dev
-```
-
-Visit:
-- `http://localhost:3000` — public home page
-- `http://localhost:3000/about` — bio page
-- `http://localhost:3000/articles` — articles list
-- `http://localhost:3000/gateway` — secret admin login
-
-### 6. Fill in the placeholders
-
-Search the project for `[` to find all placeholder text:
-
-| Placeholder          | Replace with                          |
-|----------------------|---------------------------------------|
-| `[Author Name]`      | Your name                             |
-| `[Book Title]`       | Your book's title                     |
-| `BOOK COVER`         | Your actual book cover image          |
-| `[A compelling...]`  | Your real book synopsis               |
-| `admin@yoursite.com` | Your actual email (in seed.ts + .env) |
-| Social link `href="#"` | Your real social profile URLs       |
-
-### 7. Deploy (optional — Vercel + Neon recommended)
-
-1. Push the project to a GitHub repo.
-2. Import the repo at vercel.com.
-3. Add your environment variables in the Vercel dashboard.
-4. Set `NEXTAUTH_URL` to your production domain (e.g. `https://mybook.com`).
-5. Run migrations against the production DB:
-   ```bash
-   DATABASE_URL="your-production-url" npx prisma migrate deploy
-   ```
-6. Run the seed once against production (or create the admin manually).
 
 ---
 
-## Running the Tests
+## Getting Started
 
 ```bash
-npm test
+# 1. Install dependencies
+cd backend && npm install
+cd ../frontend && npm install
+
+# 2. Run database migration
+cd ../backend && npm run db:push
+
+# 3. Seed admin + sample articles
+npm run db:seed
+
+# 4. Start backend (terminal 1)
+npm run dev
+
+# 5. Start frontend (terminal 2)
+cd ../frontend && npm run dev
 ```
 
-All 34 tests should pass with no database required (Prisma and auth are mocked).
+Visit `http://localhost:5173` for the public site.
+Visit `http://localhost:5173/gateway` to log in as admin.
 
-Test files:
-- `__tests__/lib/pagination.test.ts` — pagination math + edge cases
-- `__tests__/lib/slug.test.ts` — slug generation
-- `__tests__/api/articles.test.ts` — full CRUD API coverage with auth guards
+Default credentials (change after first login):
+- Email: `admin@yoursite.com`
+- Password: `change-this-password`
+
+---
+
+## Placeholders to Customize
+
+Search the frontend for `[` to find all placeholder text:
+
+| Placeholder             | Replace with                  |
+|-------------------------|-------------------------------|
+| `[Book Title]`          | Your book's title             |
+| `BOOK COVER`            | Your actual book cover image  |
+| `[A compelling...]`     | Your real book synopsis       |
+| `admin@yoursite.com`    | Your actual email             |
+| Social link `href="#"`  | Your real social profile URLs |

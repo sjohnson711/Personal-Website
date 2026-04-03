@@ -44,8 +44,11 @@ export async function POST(request: NextRequest) {
   const body = await request.json();
   const { title, slug, excerpt, content, published } = body;
 
-  if (!title || !slug || !excerpt || !content) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  if (!title?.trim() || !slug?.trim() || !excerpt?.trim() || !content?.trim()) {
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 },
+    );
   }
 
   const existing = await prisma.article.findUnique({ where: { slug } });

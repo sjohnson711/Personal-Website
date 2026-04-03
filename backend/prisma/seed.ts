@@ -7,11 +7,14 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const hashedPassword = await bcrypt.hash("change-this-password", 12);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) throw new Error("ADMIN_PASSWORD is not set in .env");
+
+  const hashedPassword = await bcrypt.hash(adminPassword, 12);
 
   await prisma.admin.upsert({
     where: { email: "admin@yoursite.com" },
-    update: {},
+    update: { password: hashedPassword },
     create: {
       email: "admin@yoursite.com",
       password: hashedPassword,
@@ -19,8 +22,7 @@ async function main() {
   });
 
   console.log("✓ Admin account seeded: admin@yoursite.com");
-  console.log("  Password: change-this-password");
-  console.log("  ⚠  Change this immediately after first login!");
+  console.log("  Password loaded from ADMIN_PASSWORD env variable.");
 
   const sampleArticles = [
     {
