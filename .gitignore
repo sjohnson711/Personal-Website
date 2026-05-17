@@ -19,6 +19,8 @@
 
 # production
 /build
+/dist
+dist/
 
 # misc
 .DS_Store
@@ -41,3 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Planning & notes (not for version control)
+next_steps.txt
+next_steps.py

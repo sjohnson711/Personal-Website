@@ -48,7 +48,9 @@ export default function AboutPage() {
               padding: "1rem",
             }}
           >
-            AUTHOR<br />PHOTO
+            AUTHOR
+            <br />
+            PHOTO
           </div>
         </div>
 
@@ -59,19 +61,19 @@ export default function AboutPage() {
           >
             Seth Johnson
           </h2>
-``
+          ``
           <p style={{ color: "#fff7ed", lineHeight: 1.8 }}>
-            Seth Johnson is a Software Engineer | Mental Health Therapist with a passion for educating kids from impoverished communities.
-            Born and raised in Georgia, they have spent the past 10 years
-            in human services including being a former Residential Director for formerly known Carolina Youth and Development.
+            Seth Johnson is a Software Engineer | Mental Health Therapist with a
+            passion for educating kids from impoverished communities. Born and
+            raised in Georgia, they have spent the past 10 years in human
+            services including being a former Residential Director for formerly
+            known Carolina Youth and Development.
           </p>
-
           <p style={{ color: "#fff7ed", lineHeight: 1.8 }}>
             [Second paragraph about the author's background, education, or
             notable experiences. What shaped them into the writer they are
             today? What drives their work?]
           </p>
-
           <p style={{ color: "#fff7ed", lineHeight: 1.8 }}>
             [Author Name] lives in [location] with [family details if desired].
             When not writing, they enjoy [hobbies or interests].
@@ -116,10 +118,7 @@ export default function AboutPage() {
               desc: "[Degrees, institutions, or relevant training]",
             },
           ].map(({ icon, title, desc }) => (
-            <div
-              key={title}
-              className="glass-card p-5 flex flex-col gap-2"
-            >
+            <div key={title} className="glass-card p-5 flex flex-col gap-2">
               <span style={{ fontSize: "1.5rem" }}>{icon}</span>
               <h3
                 style={{
@@ -130,7 +129,13 @@ export default function AboutPage() {
               >
                 {title}
               </h3>
-              <p style={{ color: "#a89070", fontSize: "0.88rem", lineHeight: 1.6 }}>
+              <p
+                style={{
+                  color: "#a89070",
+                  fontSize: "0.88rem",
+                  lineHeight: 1.6,
+                }}
+              >
                 {desc}
               </p>
             </div>

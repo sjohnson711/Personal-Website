@@ -299,3 +299,4 @@ All theme tokens are defined in `frontend/src/index.css` inside the `@theme {}` 
 - **Resend integration for newsletter emails** — We will be adding Resend on a later date once we get done with the functionality of the app. Website: https://resend.com/docs/send-with-express
    -*Examples: https://github.com/resend/resend-examples/blob/main/express-resend-examples/README.md
 - **Hamburger menu for mobile** — We will be adding a hamburger menu to the app when it is mobile sized.
+-*Make articles sharable 
