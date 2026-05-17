@@ -433,7 +433,7 @@ MIT — Feel free to use as template or reference for interviews.
 **Seth Johnson** — Full-stack engineer focused on scalable systems and production deployments.
 
 - **GitHub:** [sjohnson711](https://github.com/sjohnson711)
-- **LinkedIn:** [Seth Johnson](https://linkedin.com/in/seth-johnson)
+- **LinkedIn:** [Seth Johnson]([https://linkedin.com/in/seth-johnson](https://www.linkedin.com/in/seth-johnson-10a6a217b/))
 - **Live Demo:** [personal-website-kgm3-6in28es7v-seths-projects-4bb15efa.vercel.app](https://personal-website-kgm3-6in28es7v-seths-projects-4bb15efa.vercel.app)
 
 ---
