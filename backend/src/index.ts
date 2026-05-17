@@ -11,9 +11,15 @@ import contactRouter from "./routes/contact";
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
+// CORS configuration: allow Vercel deployments + explicit frontend URL
+const allowedOrigins = [
+  process.env.FRONTEND_URL ?? "http://localhost:5173",
+  /\.vercel\.app$/, // Allow all Vercel preview & production domains
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL ?? "http://localhost:5173",
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
