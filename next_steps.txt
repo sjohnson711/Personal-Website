@@ -1,0 +1,1001 @@
+"""
+================================================================================
+                           CURRENT STATUS
+================================================================================
+
+DEPLOYMENT PHASE: Testing & Debugging
+
+✅ COMPLETED:
+  ✅ Phase 1 - Neon PostgreSQL database created
+  ✅ Phase 2 - Railway backend deployed with environment variables
+  ✅ Phase 3 - Vercel frontend deployed (recreated with correct settings)
+  ✅ Phase 4 - Railway updated with Vercel domain
+  ✅ Phase 5 - Database migrations applied to Neon
+  ✅ Phase 5 - Database seeded with admin account and sample articles
+  ✅ Build errors fixed: TypeScript, Resend, frontend compilation
+  ✅ Code merged to main branch and pushed
+  ✅ Resend client initialization deferred to runtime
+  ✅ Build Fixes (2026-05-17):
+     - ShareButton.tsx - Removed unused `encodedExcerpt` variable (TS6133)
+     - ShareButton.tsx - Fixed navigator.share type check with optional chaining (TS2774)
+     - Frontend build now passing on Vercel
+
+⚠️  IN PROGRESS / DEBUGGING:
+  ⚠️  Frontend Routing - SPA navigation works locally, 404 on refresh in production
+      - vercel.json moved to frontend/ directory
+      - Root Directory set to frontend/ in Vercel
+      - Issue: Page refresh still returns 404 (needs investigation)
+
+  ⚠️  Production Login - Backend API connectivity working, but needs testing
+      - CORS configured correctly in Railway
+      - VITE_API_URL pointing to Railway backend
+      - Issue: Unable to test login on production due to routing issue
+
+⏳ PENDING:
+  ⏳ Phase 6 - Configure Resend domain verification (optional, currently using onboarding@resend.dev)
+  ⏳ Phase 7 - Add custom domain (optional)
+  ⏳ Final Testing - Verify all features work once routing is fixed
+
+🚀 CURRENT DEPLOYMENT STATUS:
+  Backend (Railway): ✅ Running and reachable at https://personal-website-production-b2f4.up.railway.app
+  Frontend (Vercel): ⚠️ Deployed but SPA routing broken on page refresh
+  Database (Neon): ✅ Schema migrated and seeded
+  Email (Resend): ✅ Configured with onboarding@resend.dev (testing)
+
+📍 PRIORITY ISSUES TO DEBUG:
+  1. SPA routing issue - vercel.json not working for React Router
+     - Home page loads fine
+     - Direct URLs like /articles, /about, /gateway return 404
+     - Page refresh on any route returns 404
+     - LOCAL TESTING works perfectly (http://localhost:5174)
+
+  2. Possible causes:
+     - vercel.json rewrites not being applied
+     - Vercel Root Directory not properly set
+     - Next.js interference (build was trying to run next build at one point)
+     - vite.config.ts or index.html configuration issue
+
+📋 DEBUGGING CHECKLIST:
+  ⏳ [ ] Verify vercel.json is in frontend/ directory and committed
+  ⏳ [ ] Check Vercel deployment log shows "dist" output directory
+  ⏳ [ ] Check if vite.config.ts has proper SPA configuration
+  ⏳ [ ] Test with direct URL navigation vs. clicking links
+  ⏳ [ ] Compare local Vite dev server vs. production behavior
+  ⏳ [ ] Check if Vercel is serving index.html for 404 routes
+
+================================================================================
+IMPLEMENTATION FEATURES (MVP + Additional Features)
+================================================================================
+
+✅ COMPLETED FEATURES:
+  ✅ Newsletter subscription system (Resend integration)
+  ✅ Article management with markdown support
+  ✅ Comments system
+  ✅ Article sharing (Twitter, LinkedIn, Facebook)
+  ✅ Contact form (sends to email)
+  ✅ Admin dashboard
+  ✅ Admin authentication (JWT + httpOnly cookies)
+  ✅ Responsive design with Tailwind CSS v4
+
+================================================================================
+VERIFIED IMPLEMENTATION CHECKLIST
+================================================================================
+
+Frontend Components:
+  ✅ ShareButton (ArticlePage)
+  ✅ ContactModal (AboutPage)
+  ✅ HeroImageCarousel (HomePage)
+
+Backend Endpoints:
+  ✅ POST /api/contact (sends contact form emails via Resend)
+  ✅ POST /api/subscribers (newsletter signup)
+  ✅ POST /api/articles (with email trigger for new article notification)
+
+Pages Completed:
+  ✅ HomePage (profile pic, hero image, newsletter form)
+  ✅ ArticlePage (article content + share button)
+  ✅ AboutPage (full bio, credentials, contact form, social links)
+
+Environment Configuration:
+  ✅ RESEND_API_KEY
+  ✅ FROM_EMAIL (currently onboarding@resend.dev for testing)
+  ✅ SITE_URL
+  ✅ DATABASE_URL
+  ✅ JWT_SECRET
+  ✅ FRONTEND_URL
+
+Testing Status:
+  ✅ Newsletter subscription form works
+  ✅ Share button functional (Twitter, LinkedIn, Facebook, Copy Link)
+  ✅ Contact form modal opens and submits
+  ✅ Emails send through Resend (visible in Resend dashboard)
+  ✅ LinkedIn link opens in new tab
+  ✅ About page displays professional content
+
+================================================================================
+NOTES FOR NEXT AGENT
+================================================================================
+
+Tech Stack:
+  - Frontend: React 19, Vite, TypeScript, Tailwind v4
+  - Backend: Express 4, TypeScript, Prisma v7
+  - Email: Resend (configured with onboarding@resend.dev for testing)
+  - Database: PostgreSQL
+  - Auth: JWT (httpOnly cookies)
+
+Current Environment:
+  - FROM_EMAIL is set to "onboarding@resend.dev" for testing
+  - This is Resend's public test email and will work for all testing
+  - For production, user needs to verify a real domain in Resend
+  - Contact form emails go to samaritanbrotherseth@gmail.com
+
+Git Status:
+  - Current branch: dashboard
+  - All changes are ready for deployment
+  - No pending commits needed before Vercel setup
+
+Key Files Modified:
+  - frontend/src/pages/HomePage.tsx (profile pic, carousel)
+  - frontend/src/pages/AboutPage.tsx (bio, highlights, contact modal)
+  - frontend/src/pages/ArticlePage.tsx (share button)
+  - frontend/src/components/ShareButton.tsx (NEW)
+  - frontend/src/components/ContactModal.tsx (NEW)
+  - frontend/src/components/HeroImageCarousel.tsx (NEW)
+  - backend/src/routes/contact.ts (NEW)
+  - backend/src/index.ts (registered contact route)
+  - backend/.env (FROM_EMAIL updated)
+
+Next Steps Priority:
+  1. Deploy to Vercel (critical for going live)
+  2. Set up production database
+  3. Configure production email (domain verification in Resend)
+  4. Add domain and SSL
+  5. Test full production flow
+
+================================================================================
+STEP-BY-STEP DEPLOYMENT GUIDE (Neon + Railway + Vercel)
+================================================================================
+
+QUICK REFERENCE - ACTUAL VALUES YOU HAVE
+================================================================================
+Copy these into each service:
+
+JWT_SECRET:
+  RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+
+RESEND_API_KEY:
+  re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+
+FROM_EMAIL:
+  onboarding@resend.dev
+
+Contact Email:
+  samaritanbrotherseth@gmail.com
+
+GitHub Repository:
+  https://github.com/[your-username]/Blog_Site
+
+Backend Directory:
+  /backend
+
+Frontend Directory:
+  /frontend
+
+================================================================================
+
+PHASE 1: SET UP NEON DATABASE
+================================================================================
+Service: neon.tech (Serverless PostgreSQL)
+
+Steps:
+  1. Sign up at https://neon.tech
+  2. Create new project (name: "blog-site" or similar)
+  3. Copy the full connection string from the dashboard
+     Format: postgresql://user:password@host/dbname?sslmode=require
+  4. Keep this string saved for Railway and Vercel setup
+
+Environment Variable for Railway/Vercel:
+  Key: DATABASE_URL
+  Value: [Copy full connection string from Neon]
+
+================================================================================
+PHASE 2: DEPLOY BACKEND TO RAILWAY
+================================================================================
+Service: railway.app (Server hosting)
+
+Steps:
+  1. Sign up at https://railway.app
+  2. Connect your GitHub account
+  3. Create new project → "Deploy from GitHub"
+  4. Select your Blog_Site repository
+  5. Select root directory: /backend
+  6. Railway will auto-detect it's a Node.js project
+
+Environment Variables to Set (in Railway Dashboard):
+  🔑 DATABASE_URL
+     Value: [Neon connection string from Phase 1]
+     Format: postgresql://user:password@host/dbname?sslmode=require
+     Where: Click "Add Variable" in Railway dashboard
+
+  🔑 JWT_SECRET
+     Value: RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+     Where: Add in Railway environment variables
+     Note: This is your current secret, keep for consistency
+
+  🔑 PORT
+     Value: 3001 (or leave blank, Railway assigns automatically)
+
+  🔑 FRONTEND_URL
+     Value: https://[your-vercel-domain].vercel.app
+     Where: Set AFTER Vercel deploy (see Phase 3)
+     Example: https://blog-site.vercel.app
+     Note: Update this after Vercel deployment completes
+
+  🔑 SITE_URL
+     Value: https://[your-vercel-domain].vercel.app
+     Where: Set AFTER Vercel deploy
+     Example: https://blog-site.vercel.app
+     Note: Used in email links (unsubscribe, etc.)
+
+  🔑 RESEND_API_KEY
+     Value: re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+     Where: Add in Railway environment variables
+     Note: This is your actual Resend API key
+
+  🔑 FROM_EMAIL
+     Value: onboarding@resend.dev
+     Where: Add in Railway environment variables
+     Note: Current value for testing. For production, verify custom domain in Resend
+
+Railway Deployment:
+  - Railway auto-deploys on push to GitHub
+  - Copy the public Railway URL (e.g., https://blog-site-api-prod.railway.app)
+  - This is your RAILWAY_BACKEND_URL for next steps
+
+================================================================================
+PHASE 3: DEPLOY FRONTEND TO VERCEL
+================================================================================
+Service: vercel.com (Frontend hosting)
+
+Steps:
+  1. Sign up at https://vercel.com
+  2. Connect your GitHub account
+  3. Import your Blog_Site repository
+  4. Configure build settings:
+     - Framework Preset: Vite
+     - Root Directory: frontend
+     - Build Command: npm run build
+     - Output Directory: dist
+  5. Add environment variable (before deploying):
+
+Environment Variables for Vercel:
+  🔑 VITE_API_URL
+     Value: https://[your-railway-domain].railway.app
+     Where: Vercel Dashboard → Settings → Environment Variables
+     Note: Use the Railway public domain from Phase 2
+
+Deploy:
+  - Click "Deploy"
+  - Vercel will build and deploy
+  - Copy your Vercel domain (e.g., https://blog-site-prod.vercel.app)
+  - This is your VERCEL_DOMAIN for next steps
+
+================================================================================
+PHASE 4: UPDATE RAILWAY ENVIRONMENT VARIABLES
+================================================================================
+Now that you have your Vercel domain, go back to Railway and update:
+
+In Railway Dashboard → Settings → Environment Variables:
+
+  🔑 FRONTEND_URL
+     Value: [Your Vercel domain from Phase 3]
+     Example: https://blog-site-prod.vercel.app
+
+  🔑 SITE_URL
+     Value: [Your Vercel domain from Phase 3]
+     Example: https://blog-site-prod.vercel.app
+
+  Action: Click "Deploy" in Railway to apply changes
+
+================================================================================
+PHASE 5: RUN DATABASE MIGRATIONS
+================================================================================
+Migrate schema to production Neon database:
+
+Option A (Railway CLI):
+  1. Install Railway CLI: npm install -g @railway/cli
+  2. Run: railway run npx prisma migrate deploy
+  3. Done - schema is now on Neon
+
+Option B (Locally with Neon credentials):
+  1. Get Neon connection string from Phase 1
+  2. Run locally:
+     DATABASE_URL="[neon-connection-string]" npx prisma migrate deploy
+  3. Verify at neon.tech dashboard
+
+Option C (One-time seed):
+  1. Seed sample data (optional):
+     DATABASE_URL="[neon-connection-string]" npx prisma db seed
+  2. This adds the admin account and 3 sample articles
+
+================================================================================
+PHASE 6: CONFIGURE RESEND (PRODUCTION EMAIL)
+================================================================================
+Service: resend.com (Email delivery)
+
+Steps:
+  1. Sign up at https://resend.com
+  2. Verify your domain:
+     - Go to Resend Dashboard → Domains
+     - Add your domain
+     - Copy DNS records Resend provides
+     - Add DNS records to your domain registrar
+     - Resend will auto-verify (can take 1-2 hours)
+
+Get Your API Key:
+  1. Go to https://resend.com → Settings → API Keys
+  2. Create new API key
+  3. Copy the key (starts with "re_")
+  4. This is your RESEND_API_KEY (already set in Railway)
+
+Create Verified From Email:
+  1. Once domain is verified, create email address (e.g., newsletter@yourdomain.com)
+  2. Update in Railway:
+     FROM_EMAIL = [your-verified-email]@[yourdomain.com]
+
+Test Email Sending:
+  1. Go to https://resend.com → Emails
+  2. Should see emails from your contact form
+  3. Check delivery status and bounces
+
+================================================================================
+PHASE 7: ADD CUSTOM DOMAIN (OPTIONAL BUT RECOMMENDED)
+================================================================================
+Service: Vercel dashboard
+
+Steps:
+  1. Buy a domain (Vercel, Namecheap, GoDaddy, etc.)
+  2. In Vercel Dashboard → Settings → Domains
+  3. Add your domain
+  4. Point nameservers or add DNS records (Vercel will guide you)
+  5. Wait 15 minutes to 24 hours for propagation
+  6. Update Resend domain records if using custom email
+
+After Domain Setup:
+  - Your site is now at: https://yourdomain.com
+  - Update FRONTEND_URL in Railway to your domain
+  - Update SITE_URL in Railway to your domain
+
+================================================================================
+PRODUCTION ENVIRONMENT VARIABLES QUICK REFERENCE
+================================================================================
+
+NEON (Database):
+  ✓ Created via neon.tech dashboard
+  ✓ Connection string: DATABASE_URL
+  ✓ Format: postgresql://user:password@host/dbname?sslmode=require
+
+RAILWAY (Backend API):
+  ✓ DATABASE_URL = [Get from Neon - see Phase 1]
+  ✓ JWT_SECRET = RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+  ✓ PORT = 3001
+  ✓ FRONTEND_URL = https://[vercel-domain].vercel.app
+  ✓ SITE_URL = https://[vercel-domain].vercel.app
+  ✓ RESEND_API_KEY = re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  ✓ FROM_EMAIL = onboarding@resend.dev (for testing)
+
+VERCEL (Frontend):
+  ✓ VITE_API_URL = https://[railway-backend-domain].railway.app
+  ✓ Example: https://blog-site-api-prod.railway.app
+
+RESEND (Email):
+  ✓ API Key: re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  ✓ Dashboard: https://resend.com/emails
+  ✓ Current From Email: onboarding@resend.dev
+  ✓ For production: Verify custom domain at https://resend.com/domains
+
+================================================================================
+TESTING CHECKLIST (After Deployment)
+================================================================================
+
+  ⏳ [ ] Frontend loads at yourdomain.com
+  ⏳ [ ] Admin login works at /gateway
+  ⏳ [ ] Create a test article
+  ⏳ [ ] Subscribe to newsletter (should receive email)
+  ⏳ [ ] Fill contact form (should receive email)
+  ⏳ [ ] Add comment to article
+  ⏳ [ ] Share article on social media
+  ⏳ [ ] Check Resend dashboard for email delivery status
+  ⏳ [ ] Monitor Railway logs for errors
+  ⏳ [ ] Test on mobile device
+
+MONITORING & TROUBLESHOOTING
+================================================================================
+
+If emails don't send:
+  1. Check RESEND_API_KEY is correct in Railway
+  2. Verify FROM_EMAIL is verified in Resend dashboard
+  3. Check Railway logs for error messages
+  4. Confirm SITE_URL is correct for unsubscribe links
+
+If frontend can't reach backend:
+  1. Check VITE_API_URL is correct in Vercel
+  2. Check FRONTEND_URL is correct in Railway (for CORS)
+  3. Check Railway domain is publicly accessible
+  4. Check Railway logs for CORS errors
+
+If database connection fails:
+  1. Verify DATABASE_URL is correct in Railway
+  2. Check Neon dashboard for connection limits
+  3. Confirm migrations ran successfully
+  4. Check Neon connection is active (no sleeping)
+
+================================================================================
+DEVELOPMENT VS PRODUCTION ENVIRONMENT VARIABLES
+================================================================================
+
+LOCAL DEVELOPMENT (.env in backend/):
+  DATABASE_URL=postgresql://sethjohnson@localhost:5432/book_site?schema=public
+  JWT_SECRET=RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+  PORT=3001
+  FRONTEND_URL=http://localhost:5173
+  SITE_URL=http://localhost:5173
+  RESEND_API_KEY=re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  FROM_EMAIL=onboarding@resend.dev
+
+PRODUCTION (Railway Dashboard):
+  DATABASE_URL=postgresql://neondb_owner:npg_J1Z3vFXauMhq@ep-crimson-dream-apdf7zky-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+  JWT_SECRET=RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+  PORT=3001
+  FRONTEND_URL=https://[your-vercel-domain].vercel.app
+  SITE_URL=https://[your-vercel-domain].vercel.app
+  RESEND_API_KEY=re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  FROM_EMAIL=onboarding@resend.dev (or verified domain email)
+
+FRONTEND - LOCAL DEVELOPMENT (implicit via Vite proxy):
+  VITE_API_URL defaults to /api (proxies to localhost:3001)
+
+FRONTEND - PRODUCTION (Vercel Dashboard):
+  VITE_API_URL=https://[your-railway-backend].railway.app
+
+================================================================================
+SERVICE ACCOUNT LINKS & DASHBOARDS
+================================================================================
+
+After deployment, bookmark these for ongoing management:
+
+NEON (Database):
+  Dashboard: https://console.neon.tech
+  Create account: https://neon.tech
+  Your project: [Link saved after signup]
+
+RAILWAY (Backend):
+  Dashboard: https://railway.app/dashboard
+  Project: [Will be created in Phase 2]
+  Logs: Railway Dashboard → Project → Logs
+
+VERCEL (Frontend):
+  Dashboard: https://vercel.com/dashboard
+  Project: [Will be created in Phase 3]
+  Analytics: Vercel Dashboard → Analytics
+
+RESEND (Email):
+  Dashboard: https://resend.com/emails
+  API Keys: https://resend.com/settings/api-keys
+  Domains: https://resend.com/domains
+  Key: re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+
+GITHUB (Code):
+  Repository: https://github.com/[your-username]/Blog_Site
+  Connected to: Vercel (auto-deploys) & Railway (auto-deploys)
+
+================================================================================
+DEPLOYMENT CHECKLIST - STEP BY STEP
+================================================================================
+
+PHASE 1: NEON DATABASE
+  ⏳ [ ✔️ ] Sign up at neon.tech
+  ⏳ [ ✔️ ] Create new project
+  ⏳ [ ✔️ ] Copy connection string
+  ⏳ [ ✔️ ]  Save as DATABASE_URL for Phase 2
+  ✓ What you'll get: postgresql://user:password@host/dbname?sslmode=require
+
+PHASE 2: RAILWAY BACKEND
+  ⏳ [ ✔️ ] Sign up at railway.app
+  ⏳ [ ✔️ ]Connect GitHub account
+  ⏳ [ ✔️ ] Create project from Blog_Site repo
+  ⏳ [ ✔️ ]Set root directory: /backend
+  ⏳ [ ] Add environment variables (7 total):
+         - DATABASE_URL=postgresql://sethjohnson@localhost:5432/book_site?schema=public
+         - JWT_SECRET (RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=)
+         - PORT (3001)
+         - FRONTEND_URL https://book-of-forgiveness-git-dashboard-seths-projects-4bb15efa.vercel.app/
+         - SITE_URL https://book-of-forgiveness-git-dashboard-seths-projects-4bb15efa.vercel.app/
+         - RESEND_API_KEY (re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx)
+         - FROM_EMAIL (onboarding@resend.dev)
+  ⏳ [ ] Deploy
+  ⏳ [ ] Copy Railway public domain
+  ✓ What you'll get: https://[project-name].railway.app
+
+PHASE 3: VERCEL FRONTEND
+  ⏳ [ ✔️ ] Sign up at vercel.com
+  ⏳ [ ✔️ ] Connect GitHub account
+  ⏳ [ ✔️ ] Import Blog_Site repo
+  ⏳ [ ✔️ ] Set root directory: frontend
+  ⏳ [ ✔️ ] Set build: npm run build
+  ⏳ [ ✔️ ] Set output: dist
+  ⏳ [ ✔️ ]Add environment variable:
+         - VITE_API_URL = [Railway domain from Phase 2]
+  ⏳ [ ✔️ ] Deploy
+  ⏳ [ ✔️ ] Copy Vercel domain - https://book-of-forgiveness-git-dashboard-seths-projects-4bb15efa.vercel.app/
+ 
+
+PHASE 4: UPDATE RAILWAY WITH VERCEL DOMAIN
+  ⏳ [ ✔️ ]  Go to Railway dashboard
+  ⏳ [ ✔️ ] Update FRONTEND_URL = [Vercel domain from Phase 3]
+  ⏳ [ ✔️ ] Update SITE_URL = [Vercel domain from Phase 3]
+  ⏳ [ ✔️ ] Click Deploy to apply changes
+
+PHASE 5: RUN DATABASE MIGRATIONS
+  ⏳ [ ] Option A: Use Railway CLI (recommended)
+         - npm install -g @railway/cli
+         - railway run npx prisma migrate deploy
+  ⏳ [ ] Option B: Run locally with Neon credentials
+         - DATABASE_URL="[from Neon]" npx prisma migrate deploy
+  ⏳ [ ] Verify schema applied in Neon dashboard
+  ✓ What you'll get: Production database schema
+personal-website-production-b2f4.up.railway.app
+PHASE 6: CONFIGURE RESEND
+  ⏳ [ ] Sign up at resend.com
+  ⏳ [ ] Verify custom domain (optional but recommended)
+  ⏳ [ ] Keep API key: re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  ⏳ [ ] Verify FROM_EMAIL: onboarding@resend.dev
+  ✓ What you'll get: Production email sending
+
+PHASE 7: ADD CUSTOM DOMAIN (OPTIONAL)
+  ⏳ [ ] Purchase domain (Vercel, Namecheap, GoDaddy)
+  ⏳ [ ] Add domain in Vercel dashboard
+  ⏳ [ ] Point nameservers or add DNS records
+  ⏳ [ ] Wait 15 min - 24 hours for propagation
+  ⏳ [ ] Update Railway: FRONTEND_URL & SITE_URL to custom domain
+  ✓ What you'll get: https://yourdomain.com
+
+FINAL TESTING
+  ⏳ [ ] Visit frontend in browser (production URL)
+  ⏳ [ ] Admin login at /gateway
+  ⏳ [ ] Create test article
+  ⏳ [ ] Subscribe to newsletter (check email)
+  ⏳ [ ] Fill contact form (check email)
+  ⏳ [ ] Post comment on article
+  ⏳ [ ] Share article (test social buttons)
+  ⏳ [ ] Check Resend dashboard for emails
+  ⏳ [ ] Check Railway logs (no errors)
+  ✓ All systems go!
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+Security:
+  - Never commit .env files to GitHub
+  - API keys are in .env (excluded by .gitignore)
+  - Production keys are set in Railway/Vercel dashboards only
+  - next_steps.txt and next_steps.py are in .gitignore
+
+Architecture:
+  - Frontend: React 19 + Vite → Deployed to Vercel
+  - Backend: Express 4 + TypeScript → Deployed to Railway
+  - Database: PostgreSQL on Neon (serverless)
+  - Email: Resend (onboarding@resend.dev for testing)
+  - Auth: JWT with httpOnly cookies
+
+Auto-Deploy:
+  - Vercel: Auto-deploys on push to GitHub
+  - Railway: Auto-deploys on push to GitHub
+  - Simply push code, services auto-build and deploy
+
+Domains:
+  - Vercel auto-assigns [project].vercel.app subdomain
+  - Custom domain optional (Phase 7)
+  - All services support HTTPS automatically
+
+Data Flow:
+  1. User visits https://yourdomain.com (Vercel frontend)
+  2. Frontend fetches from Railway backend
+  3. Backend queries Neon PostgreSQL
+  4. Emails send via Resend
+  5. Auth tokens stored in httpOnly cookies
+
+Backups:
+  - Code: GitHub
+  - Database: Neon (auto-backups available)
+  - Email history: Resend dashboard
+  - Deployments: Vercel/Railway history
+
+================================================================================
+ENVIRONMENT VARIABLES - COMPLETE REFERENCE
+================================================================================
+
+DEVELOPMENT (Local - backend/.env):
+  DATABASE_URL = postgresql://[user]@localhost:5432/book_site?schema=public
+  JWT_SECRET = RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+  PORT = 3001
+  FRONTEND_URL = http://localhost:5173
+  SITE_URL = http://localhost:5173
+  RESEND_API_KEY = re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  FROM_EMAIL = onboarding@resend.dev
+
+PRODUCTION - RAILWAY (Backend Server):
+  DATABASE_URL = postgresql://[neon-user]@[neon-host]/[neon-db]?sslmode=require&channel_binding=require
+  JWT_SECRET = RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+  PORT = 3001
+  FRONTEND_URL = https://book-of-forgiveness-git-dashboard-seths-projects-4bb15efa.vercel.app
+  SITE_URL = https://book-of-forgiveness-git-dashboard-seths-projects-4bb15efa.vercel.app
+  RESEND_API_KEY = re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  FROM_EMAIL = onboarding@resend.dev
+
+PRODUCTION - VERCEL (Frontend):
+  VITE_API_URL = https://[railway-backend-domain].railway.app
+
+================================================================================
+SERVICE CREDENTIALS & API KEYS
+================================================================================
+
+Resend Email Service:
+  API Key: re_54jBUeFE_15LQVCsqVUMmTaDStTr9G2wx
+  From Email: onboarding@resend.dev
+  Dashboard: https://resend.com/emails
+  API Settings: https://resend.com/settings/api-keys
+
+JWT Secret:
+  Value: RAvaoMHRHjVjTDABv8iAQPgAZOp2Z4UMeOV57LlKlyU=
+  Purpose: Sign and verify auth tokens
+  Keep safe and do not share
+
+Database (Neon PostgreSQL):
+  Service: https://neon.tech
+  Dashboard: https://console.neon.tech
+  Connection String: postgresql://neondb_owner:npg_J1Z3vFXauMhq@ep-crimson-dream-apdf7zky-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+  Note: Copy exact string with sslmode=require
+
+GitHub Repository:
+  URL: https://github.com/sjohnson711/Personal-Website
+  Note: Connected to Railway and Vercel for auto-deploy
+
+Production Domains:
+  Frontend (Vercel): https://book-of-forgiveness-git-dashboard-seths-projects-4bb15efa.vercel.app
+  Backend (Railway): personal-website-production-b2f4.up.railway.app
+  Note: Update FRONTEND_URL and SITE_URL in Railway once you have Vercel domain
+
+================================================================================
+DEPLOYMENT & TROUBLESHOOTING GUIDE FOR MONOREPO PROJECTS
+================================================================================
+
+This guide documents how to deploy a full-stack monorepo (frontend + backend + database)
+to Vercel + Railway + Neon, and how to troubleshoot common issues that arose in this project.
+
+PART 1: PROJECT STRUCTURE FOR MONOREPO DEPLOYMENTS
+================================================================================
+
+DO THIS FIRST - Organize as a monorepo with separate frontend/backend:
+
+```
+blog-site/
+├── frontend/          ← React/Vite app (deploys to Vercel)
+│   ├── src/
+│   ├── package.json   ← MUST have: react, vite, @vitejs/plugin-react
+│   ├── vercel.json    ← SPA rewrites (not needed at root)
+│   └── vite.config.ts
+├── backend/           ← Express server (deploys to Railway)
+│   ├── src/
+│   ├── package.json   ← MUST have: express, prisma, typescript
+│   ├── prisma/
+│   │   ├── schema.prisma
+│   │   ├── migrations/
+│   │   └── seed.ts
+│   └── .env
+├── package.json       ← ROOT: minimal, declares workspaces
+└── vercel.json        ← ROOT: tells Vercel how to build frontend
+```
+
+KEY: Root package.json should be minimal with workspaces, NOT a full config.
+
+PART 2: CRITICAL DEPENDENCIES BY LAYER
+================================================================================
+
+FRONTEND (Vite + React):
+
+Required for Build:
+  ✓ @vitejs/plugin-react        ← Handles JSX transformation
+  ✓ vite                         ← Bundler (replacing webpack)
+  ✓ typescript                   ← Type checking (tsc runs before vite)
+  ✓ @tailwindcss/vite           ← Tailwind CSS v4 Vite plugin
+  ✓ @tailwindcss/postcss        ← Required for PostCSS integration in v4
+  ✓ tailwindcss                  ← Utility CSS framework
+
+Required for Runtime:
+  ✓ react & react-dom           ← UI library
+  ✓ react-router-dom            ← Client-side routing (required for SPA)
+  ✓ marked                       ← Markdown rendering
+  ✓ slugify                      ← URL-safe slug generation
+
+Common mistakes:
+  ✗ Missing react-router-dom    → Error: "Cannot find module 'react-router-dom'"
+  ✗ Missing @tailwindcss/postcss → Error: "Cannot find module '@tailwindcss/postcss'"
+  ✗ Using @tailwindcss/vite v3  → Incompatible with Tailwind v4
+
+BACKEND (Express + Prisma):
+
+Required:
+  ✓ express                      ← Web server
+  ✓ @prisma/client              ← ORM (generated to src/generated/prisma/)
+  ✓ @prisma/adapter-pg          ← PostgreSQL driver adapter (Prisma v7)
+  ✓ pg                           ← PostgreSQL client (peer dependency)
+  ✓ prisma                       ← CLI (dev dependency)
+  ✓ typescript                   ← Type checking
+  ✓ tsx                          ← TypeScript executor for seed.ts
+
+Important notes:
+  - Prisma v7 uses driver adapters; must have @prisma/adapter-pg + pg
+  - prisma.schema.ts has NO url field — connection comes from PrismaPg(DATABASE_URL)
+  - Prisma client generated to src/generated/prisma (check schema.prisma)
+
+DATABASE (Neon PostgreSQL):
+
+Setup:
+  1. Create project at neon.tech
+  2. Copy full connection string with sslmode=require & channel_binding=require
+  3. Store as DATABASE_URL environment variable
+
+Migration & Seeding:
+  # Run migrations (apply schema)
+  DATABASE_URL="<neon-url>" npx prisma migrate deploy
+
+  # Seed data (create admin, sample articles)
+  DATABASE_URL="<neon-url>" ADMIN_PASSWORD="<password>" npx tsx prisma/seed.ts
+
+PART 3: STEP-BY-STEP DEPLOYMENT FLOW
+================================================================================
+
+STEP 1: Create Root package.json with Workspaces
+────────────────────────────────────────────────
+
+File: package.json
+```json
+{
+  "name": "your-project",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": ["frontend", "backend"]
+}
+```
+
+Why: Tells npm to install dependencies in both frontend/ and backend/
+     Single npm install handles all projects.
+
+STEP 2: Create Root vercel.json
+────────────────────────────────
+
+File: vercel.json
+```json
+{
+  "buildCommand": "npm install && cd frontend && npm run build",
+  "outputDirectory": "frontend/dist",
+  "env": {
+    "VITE_API_URL": "@vite-api-url"
+  }
+}
+```
+
+Why: Tells Vercel to:
+     - Run npm install (installs all workspace dependencies)
+     - cd into frontend and run vite build
+     - Serve from frontend/dist
+     - Use VITE_API_URL env var (set in Vercel dashboard)
+
+STEP 3: Neon Setup
+──────────────────
+
+1. Sign up at https://neon.tech
+2. Create project
+3. Copy connection string (contains password — keep secret!)
+4. Save for Railway setup (Step 5)
+
+STEP 4: Railway Backend Setup
+──────────────────────────────
+
+1. Sign up at https://railway.app
+2. Connect GitHub account
+3. Create project → "Deploy from GitHub"
+4. Select your repo
+5. Set root directory: /backend
+6. Add environment variables (in Railway dashboard):
+   - DATABASE_URL (from Neon)
+   - JWT_SECRET (generate one or use existing)
+   - FRONTEND_URL (set after Vercel domain is ready)
+   - SITE_URL (same as FRONTEND_URL)
+   - RESEND_API_KEY (if using email)
+   - FROM_EMAIL (if using email)
+   - ADMIN_PASSWORD (for seeding)
+
+7. Railway auto-deploys on GitHub push
+8. Copy Railway public domain (e.g., https://your-project.railway.app)
+
+STEP 5: Vercel Frontend Setup
+──────────────────────────────
+
+1. Sign up at https://vercel.com
+2. Import your GitHub repo
+3. DO NOT select a framework — it will auto-detect
+4. Set Root Directory: . (root, not frontend/)
+5. Set Build Command: npm install && cd frontend && npm run build
+6. Set Output Directory: frontend/dist
+7. Add environment variables:
+   - VITE_API_URL = https://your-railway-domain.railway.app
+8. Deploy
+9. Copy Vercel domain (e.g., https://your-project.vercel.app)
+
+STEP 6: Update Railway with Vercel Domain
+──────────────────────────────────────────
+
+1. Go back to Railway dashboard
+2. Update environment variables:
+   - FRONTEND_URL = https://your-vercel-domain.vercel.app
+   - SITE_URL = https://your-vercel-domain.vercel.app
+3. Redeploy
+4. Test: https://your-vercel-domain.vercel.app should load
+
+STEP 7: Sync Local Data to Production
+──────────────────────────────────────
+
+Export local articles:
+  pg_dump --username=<user> --dbname=<db> \
+    --table='"Article"' --data-only --column-inserts \
+    > articles.sql
+
+Import to Neon:
+  psql "<neon-connection-string>" -f articles.sql
+
+Seed production database:
+  DATABASE_URL="<neon-url>" ADMIN_PASSWORD="<password>" npx tsx prisma/seed.ts
+
+PART 4: COMMON ERRORS & HOW TO FIX THEM
+================================================================================
+
+ERROR 1: "Cannot find module 'react-router-dom'"
+────────────────────────────────────────────────
+
+Cause: npm install didn't run in frontend/ directory
+Solution:
+  1. Check frontend/package.json has react-router-dom listed
+  2. Check Root vercel.json has: buildCommand: "npm install && cd frontend && npm run build"
+  3. Trigger new Vercel deployment
+
+ERROR 2: "Cannot find module '@tailwindcss/postcss'"
+───────────────────────────────────────────────────
+
+Cause: Tailwind v4 requires @tailwindcss/postcss in devDependencies
+Solution:
+  1. Add to frontend/package.json devDependencies:
+     "@tailwindcss/postcss": "^4"
+  2. Commit and push
+  3. Trigger new Vercel deployment
+
+ERROR 3: "Command 'npm run build' exited with 254: Cannot read package.json"
+────────────────────────────────────────────────────────────────────────────
+
+Cause: Vercel looking for package.json in root, but file was deleted
+Solution:
+  1. Create root package.json with workspaces (see STEP 1 above)
+  2. Create root vercel.json with correct buildCommand (see STEP 2 above)
+  3. Commit and push
+  4. Trigger new deployment
+
+ERROR 4: "Building with Next.js instead of Vite"
+─────────────────────────────────────────────────
+
+Cause: Root package.json has "build": "next build"
+Solution:
+  1. Delete root package.json
+  2. Create minimal root package.json with workspaces only
+  3. Ensure vercel.json buildCommand is: "npm install && cd frontend && npm run build"
+  4. Commit, push, redeploy
+
+ERROR 5: "TS2774: This condition will always return true"
+──────────────────────────────────────────────────────────
+
+Cause: TypeScript thinks navigator.share is always defined (it's not, varies by browser)
+Solution:
+  1. Use optional chaining: navigator?.share
+  2. Or add @ts-expect-error comment above the check
+  3. Or use: typeof navigator.share === "function"
+
+ERROR 6: "TS6133: Variable declared but never used"
+─────────────────────────────────────────────────────
+
+Cause: Dead code or variable no longer needed
+Solution:
+  1. Delete the unused variable
+  2. If intentionally unused, prefix with _ (e.g., _encodedExcerpt)
+
+PART 5: DEBUGGING CHECKLIST FOR BUILD FAILURES
+================================================================================
+
+When your Vercel build fails:
+
+1. CHECK THE BUILD LOG (not terminal output):
+   ⏳ Go to Vercel dashboard
+   ⏳ Click "Deployments"
+   ⏳ Click the failed deployment
+   ⏳ Scroll to the bottom — the actual error is there
+   ⏳ Copy the full error message (sometimes truncated in console)
+
+2. IDENTIFY ERROR TYPE:
+   ⏳ Module not found? → Missing dependency in package.json
+   ⏳ TypeScript error (TS####)? → Type issue, check file causing error
+   ⏳ Build tool error? → Check vite.config.ts or postcss.config
+   ⏳ npm install failed? → Check root package.json and vercel.json
+
+3. VERIFY FILE STRUCTURE:
+   ⏳ Check root package.json exists and has workspaces
+   ⏳ Check root vercel.json exists and has correct buildCommand
+   ⏳ Check frontend/package.json has all required dependencies
+   ⏳ Check frontend/vite.config.ts is correct
+
+4. VERIFY ENVIRONMENT VARIABLES:
+   ⏳ Go to Vercel dashboard → Settings → Environment Variables
+   ⏳ Confirm VITE_API_URL is set to your Railway backend domain
+   ⏳ Confirm all vars are set before deploying
+
+5. LOCAL TESTING:
+   ⏳ Run `npm install` locally to verify dependencies install
+   ⏳ Run `npm run build` locally to verify build works
+   ⏳ If it builds locally but fails on Vercel, issue is environment-specific
+   ⏳ Check for hardcoded paths, absolute URLs, or missing env vars
+
+6. COMMON QUICK FIXES:
+   ⏳ Delete node_modules and package-lock.json, reinstall
+   ⏳ Clear Vercel build cache and redeploy
+   ⏳ Check git status — ensure changes are committed
+   ⏳ Verify you pushed to the right branch (should be main)
+
+PART 6: FUTURE PROJECT CHECKLIST
+================================================================================
+
+Use this when starting a new full-stack project:
+
+Pre-Deployment:
+  ☐ Create root package.json with workspaces
+  ☐ Create root vercel.json with correct buildCommand
+  ☐ Verify all dependencies listed in frontend/package.json
+  ☐ Test build locally: npm install && npm run build
+  ☐ Ensure no hardcoded localhost URLs (use env vars instead)
+  ☐ Set up .gitignore (exclude node_modules, .env, dist, etc.)
+
+Database (Neon):
+  ☐ Create Neon project
+  ☐ Get full connection string with sslmode=require
+  ☐ Run migrations: npx prisma migrate deploy
+  ☐ Seed data if needed
+
+Backend (Railway):
+  ☐ Create Railway project
+  ☐ Set root directory: /backend
+  ☐ Add all environment variables
+  ☐ Copy Railway public domain after deploy
+
+Frontend (Vercel):
+  ☐ Create Vercel project
+  ☐ Set Root Directory: . (root)
+  ☐ Confirm vercel.json buildCommand is correct
+  ☐ Add VITE_API_URL pointing to Railway domain
+  ☐ Deploy and copy Vercel domain
+
+Final Step:
+  ☐ Update Railway FRONTEND_URL and SITE_URL with Vercel domain
+  ☐ Redeploy Railway
+  ☐ Test frontend → backend connectivity
+  ☐ Test login and API calls
+
+================================================================================
+"""
