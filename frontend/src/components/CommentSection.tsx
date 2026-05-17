@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { api } from "../lib/api";
 
 interface Comment { id: number; name: string; body: string; createdAt: string; }
 interface CommentSectionProps { articleId: number; }
@@ -16,8 +17,8 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/comments/${articleId}`)
-      .then((r) => r.json())
+    api
+      .get(`/comments/${articleId}`)
       .then((d: { comments: Comment[] }) => setComments(d.comments ?? []))
       .catch(() => {});
   }, [articleId]);
@@ -28,25 +29,22 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
     setError("");
     setSuccess(false);
 
-    const res = await fetch(`/api/comments/${articleId}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), body: body.trim() }),
-    });
-
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({})) as { error?: string };
-      setError(d.error ?? "Something went wrong. Please try again.");
+    try {
+      const c: Comment = await api.post(`/comments/${articleId}`, {
+        name: name.trim(),
+        body: body.trim(),
+      });
+      setComments((prev) => [...prev, c]);
+      setName("");
+      setBody("");
+      setSuccess(true);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
+      );
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    const c: Comment = await res.json();
-    setComments((prev) => [...prev, c]);
-    setName("");
-    setBody("");
-    setSuccess(true);
-    setSubmitting(false);
   }
 
   return (

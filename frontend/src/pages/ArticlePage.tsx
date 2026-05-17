@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { marked } from "marked";
 import CommentSection from "../components/CommentSection";
+import ShareButton from "../components/ShareButton";
+import { api } from "../lib/api";
 
 interface Article { id: number; title: string; excerpt: string; content: string; createdAt: string; published: boolean; }
 
@@ -14,16 +16,22 @@ export default function ArticlePage() {
 
   useEffect(() => {
     if (!slug) return;
-    fetch(`/api/articles/${slug}`)
-      .then(async (res) => {
-        if (!res.ok) { setNotFound(true); setLoading(false); return; }
-        const d: Article = await res.json();
-        if (!d.published) { setNotFound(true); setLoading(false); return; }
+    api
+      .get(`/articles/${slug}`)
+      .then(async (d: Article) => {
+        if (!d.published) {
+          setNotFound(true);
+          setLoading(false);
+          return;
+        }
         setArticle(d);
         setHtml(await marked(d.content));
         setLoading(false);
       })
-      .catch(() => { setNotFound(true); setLoading(false); });
+      .catch(() => {
+        setNotFound(true);
+        setLoading(false);
+      });
   }, [slug]);
 
   if (loading) return <div style={{ padding: "6rem", textAlign: "center", color: "#A8A29E", fontFamily: '"DM Sans", sans-serif' }}>Loading…</div>;
@@ -59,9 +67,10 @@ export default function ArticlePage() {
           >
             {article.title}
           </h1>
-          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#6B6560", fontStyle: "italic", lineHeight: 1.7, fontSize: "1rem", margin: 0 }}>
+          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#6B6560", fontStyle: "italic", lineHeight: 1.7, fontSize: "1rem", margin: "0 0 1.5rem" }}>
             {article.excerpt}
           </p>
+          <ShareButton title={article.title} excerpt={article.excerpt} />
         </header>
 
         <div className="prose-ink" dangerouslySetInnerHTML={{ __html: html }} />

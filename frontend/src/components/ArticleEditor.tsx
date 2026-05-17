@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateSlug } from "../lib/slug";
+import { api } from "../lib/api";
 
 interface ArticleEditorProps {
   mode: "new" | "edit";
@@ -24,20 +25,31 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
     e.preventDefault();
     setSaving(true);
     setError("");
-    const url = mode === "new" ? "/api/articles" : `/api/articles/${initialData!.id}`;
-    const res = await fetch(url, {
-      method: mode === "new" ? "POST" : "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ title, slug, excerpt, content, published }),
-    });
-    if (!res.ok) {
-      const d = await res.json().catch(() => ({})) as { error?: string };
-      setError(d.error ?? "Something went wrong.");
+    try {
+      if (mode === "new") {
+        await api.post("/articles", {
+          title,
+          slug,
+          excerpt,
+          content,
+          published,
+        });
+      } else {
+        await api.put(`/articles/${initialData!.id}`, {
+          title,
+          slug,
+          excerpt,
+          content,
+          published,
+        });
+      }
+      navigate("/admin/dashboard");
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Something went wrong."
+      );
       setSaving(false);
-      return;
     }
-    navigate("/admin/dashboard");
   }
 
   return (

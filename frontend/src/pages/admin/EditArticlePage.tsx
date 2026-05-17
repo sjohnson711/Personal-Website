@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import ArticleEditor from "../../components/ArticleEditor";
+import { api } from "../../lib/api";
 
 interface Article { id: number; title: string; slug: string; excerpt: string; content: string; published: boolean; }
 
@@ -12,13 +13,16 @@ export default function EditArticlePage() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/articles/${id}`, { credentials: "include" })
-      .then(async (res) => {
-        if (!res.ok) { setNotFound(true); setLoading(false); return; }
-        setArticle(await res.json());
+    api
+      .get(`/articles/${id}`)
+      .then((article: Article) => {
+        setArticle(article);
         setLoading(false);
       })
-      .catch(() => { setNotFound(true); setLoading(false); });
+      .catch(() => {
+        setNotFound(true);
+        setLoading(false);
+      });
   }, [id]);
 
   if (loading) return (

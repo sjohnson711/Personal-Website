@@ -6,14 +6,14 @@ A full-stack personal website for weekly blog posts, built with a **React** fron
 
 ## Tech Stack
 
-| Layer      | Technology                                      |
-|------------|-------------------------------------------------|
-| Frontend   | React 19, Vite, TypeScript, Tailwind CSS v4     |
-| Backend    | Express 4, TypeScript, tsx (dev server)         |
-| Database   | PostgreSQL via Prisma v7 ORM                    |
-| Auth       | JWT (httpOnly cookie), bcrypt password hashing  |
-| Markdown   | marked                                          |
-| Routing    | React Router v7                                 |
+| Layer    | Technology                                     |
+| -------- | ---------------------------------------------- |
+| Frontend | React 19, Vite, TypeScript, Tailwind CSS v4    |
+| Backend  | Express 4, TypeScript, tsx (dev server)        |
+| Database | PostgreSQL via Prisma v7 ORM                   |
+| Auth     | JWT (httpOnly cookie), bcrypt password hashing |
+| Markdown | marked                                         |
+| Routing  | React Router v7                                |
 
 ---
 
@@ -122,12 +122,12 @@ PORT=3001
 FRONTEND_URL="http://localhost:5173"
 ```
 
-| Variable       | Description                                            |
-|----------------|--------------------------------------------------------|
-| `DATABASE_URL` | PostgreSQL connection string                           |
-| `JWT_SECRET`   | Secret used to sign/verify JWT tokens — keep private   |
-| `PORT`         | Port the Express server listens on (default: 3001)     |
-| `FRONTEND_URL` | Allowed CORS origin (default: Vite dev server)         |
+| Variable       | Description                                          |
+| -------------- | ---------------------------------------------------- |
+| `DATABASE_URL` | PostgreSQL connection string                         |
+| `JWT_SECRET`   | Secret used to sign/verify JWT tokens — keep private |
+| `PORT`         | Port the Express server listens on (default: 3001)   |
+| `FRONTEND_URL` | Allowed CORS origin (default: Vite dev server)       |
 
 ---
 
@@ -146,11 +146,13 @@ This creates the `Article`, `Comment`, and `Admin` tables.
 ### 2. Seed the database
 
 This will run the update to the database
+
 ```bash
 npm run db:seed
 ```
 
 This creates:
+
 - Admin account: `admin@yoursite.com` / `change-this-password`
 - 3 sample articles (2 published, 1 draft)
 
@@ -197,6 +199,7 @@ The admin login page is at `/gateway` — it is not linked anywhere in the publi
 3. You are redirected to `/admin/dashboard`
 
 From the dashboard you can:
+
 - View article stats (total, published, drafts)
 - Create a new article (Markdown supported)
 - Edit or delete existing articles
@@ -208,29 +211,29 @@ From the dashboard you can:
 
 ### Auth
 
-| Method | Endpoint         | Description                         | Auth |
-|--------|------------------|-------------------------------------|------|
-| POST   | `/api/auth/login`  | Sign in, sets httpOnly cookie       | —    |
-| POST   | `/api/auth/logout` | Clear session cookie                | —    |
-| GET    | `/api/auth/me`     | Returns current admin email         | Yes  |
+| Method | Endpoint           | Description                   | Auth |
+| ------ | ------------------ | ----------------------------- | ---- |
+| POST   | `/api/auth/login`  | Sign in, sets httpOnly cookie | —    |
+| POST   | `/api/auth/logout` | Clear session cookie          | —    |
+| GET    | `/api/auth/me`     | Returns current admin email   | Yes  |
 
 ### Articles
 
-| Method | Endpoint              | Description                              | Auth     |
-|--------|-----------------------|------------------------------------------|----------|
-| GET    | `/api/articles`         | Paginated list (published only)          | —        |
-| GET    | `/api/articles?admin=true` | All articles including drafts        | Yes      |
-| GET    | `/api/articles/:idOrSlug` | Single article by ID or slug         | —        |
-| POST   | `/api/articles`         | Create new article                       | Yes      |
-| PUT    | `/api/articles/:id`     | Update article                           | Yes      |
-| DELETE | `/api/articles/:id`     | Delete article                           | Yes      |
+| Method | Endpoint                   | Description                     | Auth |
+| ------ | -------------------------- | ------------------------------- | ---- |
+| GET    | `/api/articles`            | Paginated list (published only) | —    |
+| GET    | `/api/articles?admin=true` | All articles including drafts   | Yes  |
+| GET    | `/api/articles/:idOrSlug`  | Single article by ID or slug    | —    |
+| POST   | `/api/articles`            | Create new article              | Yes  |
+| PUT    | `/api/articles/:id`        | Update article                  | Yes  |
+| DELETE | `/api/articles/:id`        | Delete article                  | Yes  |
 
 ### Comments
 
-| Method | Endpoint                  | Description                       | Auth |
-|--------|---------------------------|-----------------------------------|------|
-| GET    | `/api/comments/:articleId`  | All comments for an article       | —    |
-| POST   | `/api/comments/:articleId`  | Submit a reader message           | —    |
+| Method | Endpoint                   | Description                 | Auth |
+| ------ | -------------------------- | --------------------------- | ---- |
+| GET    | `/api/comments/:articleId` | All comments for an article | —    |
+| POST   | `/api/comments/:articleId` | Submit a reader message     | —    |
 
 ---
 
@@ -275,14 +278,24 @@ Output is compiled to `backend/dist/`.
 
 ## Color Design System
 
-| Role               | Color          | Hex       |
-|--------------------|----------------|-----------|
-| Headings / Accent  | Amber          | `#FBBF24` |
-| Buttons / Links    | Forest Green   | `#40916C` |
-| Primary Button BG  | Dark Forest    | `#217346` |
-| Navbar BG          | Dark Forest    | `rgba(27,67,50,0.95)` |
-| Body Text          | Cream          | `#FFF7ED` |
-| Muted Text         | Warm Tan       | `#A89070` |
-| Cards              | Frosted Dark   | `rgba(10,5,0,0.62)` |
+| Role              | Color        | Hex                   |
+| ----------------- | ------------ | --------------------- |
+| Headings / Accent | Amber        | `#FBBF24`             |
+| Buttons / Links   | Forest Green | `#40916C`             |
+| Primary Button BG | Dark Forest  | `#217346`             |
+| Navbar BG         | Dark Forest  | `rgba(27,67,50,0.95)` |
+| Body Text         | Cream        | `#FFF7ED`             |
+| Muted Text        | Warm Tan     | `#A89070`             |
+| Cards             | Frosted Dark | `rgba(10,5,0,0.62)`   |
 
 All theme tokens are defined in `frontend/src/index.css` inside the `@theme {}` block (Tailwind v4 CSS config).
+
+---
+
+> **Note:** If you add anything else to this file, always keep the following section at the very bottom.
+
+## Features to add
+
+- **Resend integration for newsletter emails** — We will be adding Resend on a later date once we get done with the functionality of the app. Website: https://resend.com/docs/send-with-express
+   -*Examples: https://github.com/resend/resend-examples/blob/main/express-resend-examples/README.md
+- **Hamburger menu for mobile** — We will be adding a hamburger menu to the app when it is mobile sized.

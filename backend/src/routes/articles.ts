@@ -6,16 +6,19 @@ import {
   getOptionalAuth,
   AuthRequest,
 } from "../middleware/requireAuth";
+import { notifySubscribers } from "../lib/email";
 
 const router = Router();
 
 // GET /api/articles
 router.get("/", async (req: Request, res: Response): Promise<void> => {
-  const adminMode = req.query.admin === "true";
+  const adminParam = Array.isArray(req.query.admin) ? req.query.admin[0] : req.query.admin;
+  const adminMode = adminParam === "true";
   const isAdmin = adminMode && getOptionalAuth(req);
 
+  const pageParam = Array.isArray(req.query.page) ? req.query.page[0] : req.query.page;
   const { page, skip, take } = getPaginationParams({
-    page: req.query.page as string,
+    page: pageParam as string,
   });
 
   const whereClause = isAdmin ? {} : { published: true as const };
@@ -34,21 +37,24 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
 });
 
 // GET /api/articles/:id  (accepts numeric id or slug)
-router.get("/:id", async (req: Request, res: Response): Promise<void> => {
-  const { id } = req.params;
-  const numericId = parseInt(id, 10);
+router.get(
+  "/:id",
+  async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const numericId = parseInt(id, 10);
 
-  const article = isNaN(numericId)
-    ? await prisma.article.findUnique({ where: { slug: id } })
-    : await prisma.article.findUnique({ where: { id: numericId } });
+    const article = isNaN(numericId)
+      ? await prisma.article.findUnique({ where: { slug: id } })
+      : await prisma.article.findUnique({ where: { id: numericId } });
 
-  if (!article) {
-    res.status(404).json({ error: "Not found" });
-    return;
-  }
+    if (!article) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
 
-  res.json(article);
-});
+    res.json(article);
+  },
+);
 
 // POST /api/articles  (auth required)
 router.post(
@@ -73,6 +79,9 @@ router.post(
     });
 
     res.status(201).json(article);
+    if (article.published) {
+      notifySubscribers(article);
+    }
   },
 );
 
@@ -81,7 +90,7 @@ router.put(
   "/:id",
   requireAuth,
   async (req: AuthRequest, res: Response): Promise<void> => {
-    const numericId = parseInt(req.params.id, 10);
+    const numericId = parseInt(req.params.id as string, 10);
     if (isNaN(numericId)) {
       res.status(400).json({ error: "Invalid ID" });
       return;
@@ -114,6 +123,9 @@ router.put(
     });
 
     res.json(updated);
+    if (!existing.published && updated.published) {
+      notifySubscribers(updated);
+    }
   },
 );
 
@@ -122,7 +134,7 @@ router.delete(
   "/:id",
   requireAuth,
   async (req: AuthRequest, res: Response): Promise<void> => {
-    const numericId = parseInt(req.params.id, 10);
+    const numericId = parseInt(req.params.id as string, 10);
     if (isNaN(numericId)) {
       res.status(400).json({ error: "Invalid ID" });
       return;

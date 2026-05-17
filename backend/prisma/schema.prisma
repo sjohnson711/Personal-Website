@@ -33,3 +33,10 @@ model Admin {
   email    String @unique
   password String
 }
+
+model Subscriber {
+  id               Int      @id @default(autoincrement())
+  email            String   @unique
+  unsubscribeToken String   @unique
+  createdAt        DateTime @default(now())
+}
