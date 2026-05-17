@@ -1,0 +1,10 @@
+{
+  "name": "blog-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-stack blog site with React frontend and Express backend",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
