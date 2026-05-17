@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface ShareButtonProps {
   title: string;
@@ -12,7 +12,6 @@ export default function ShareButton({ title, excerpt }: ShareButtonProps) {
   const url = window.location.href;
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
-  const encodedText = encodeURIComponent(excerpt);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(url);
@@ -112,7 +111,7 @@ export default function ShareButton({ title, excerpt }: ShareButtonProps) {
               gap: "0.5rem",
             }}
           >
-            {navigator.share && (
+            {!!navigator.share && (
               <>
                 <button
                   onClick={handleNativeShare}
