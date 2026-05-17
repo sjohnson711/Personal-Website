@@ -305,7 +305,7 @@ export default function HomePage() {
                 }}
               >
                 <img
-                  src="/profile-picture.png"
+                  src="/profile library pic.png"
                   alt="Seth Johnson"
                   style={{
                     width: "60px",
