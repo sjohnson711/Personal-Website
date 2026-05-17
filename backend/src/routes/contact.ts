@@ -25,7 +25,7 @@ router.post("/", async (req: Request, res: Response) => {
       fromEmail = emailMatch[1];
     }
 
-    const result = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: "samaritanbrotherseth@gmail.com",
       subject: `New Contact Message from ${name}`,
@@ -51,13 +51,13 @@ router.post("/", async (req: Request, res: Response) => {
       replyTo: email,
     });
 
-    if (result.error || !result.data) {
-      console.error("[resend] Error sending contact email:", result.error);
+    if (error) {
+      console.error("[resend] Error sending contact email:", error);
       res.status(500).json({ error: "Failed to send message. Please try again later." });
       return;
     }
 
-    console.log("[resend] Contact email sent successfully:", result.data.id);
+    console.log("[resend] Contact email sent successfully:", data?.id);
     res.json({ success: true, message: "Message sent successfully" });
   } catch (err) {
     console.error("[contact] Unexpected error:", err);
