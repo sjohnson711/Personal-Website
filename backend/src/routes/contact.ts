@@ -57,7 +57,7 @@ router.post("/", async (req: Request, res: Response) => {
       return;
     }
 
-    console.log("[resend] Contact email sent successfully:", result.id);
+    console.log("[resend] Contact email sent successfully:", result.data?.id);
     res.json({ success: true, message: "Message sent successfully" });
   } catch (err) {
     console.error("[contact] Unexpected error:", err);
