@@ -5,6 +5,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { api } from "../lib/api";
 
 interface AuthState {
   email: string | null;
@@ -22,8 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ email: null, loading: true });
 
   useEffect(() => {
-    fetch("/api/auth/me", { credentials: "include" })
-      .then((res) => (res.ok ? res.json() : null))
+    api
+      .get("/auth/me")
       .then((data: { email: string } | null) =>
         setState({ email: data?.email ?? null, loading: false }),
       )
@@ -31,23 +32,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(email: string, password: string): Promise<boolean> {
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (res.ok) {
-      const data: { email: string } = await res.json();
+    try {
+      const data: { email: string } = await api.post("/auth/login", {
+        email,
+        password,
+      });
       setState({ email: data.email, loading: false });
       return true;
+    } catch {
+      return false;
     }
-    return false;
   }
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    await api.post("/auth/logout");
     setState({ email: null, loading: false });
   }
 

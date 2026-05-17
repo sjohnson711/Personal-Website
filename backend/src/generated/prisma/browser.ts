@@ -32,3 +32,8 @@ export type Comment = Prisma.CommentModel
  * 
  */
 export type Admin = Prisma.AdminModel
+/**
+ * Model Subscriber
+ * 
+ */
+export type Subscriber = Prisma.SubscriberModel

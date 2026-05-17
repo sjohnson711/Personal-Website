@@ -11,4 +11,5 @@
 export type * from './models/Article'
 export type * from './models/Comment'
 export type * from './models/Admin'
+export type * from './models/Subscriber'
 export type * from './commonInputTypes'

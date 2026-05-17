@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"; // Link is like an <a> tag, but navigates without refreshing the page
 import { useState } from "react"; // useState lets us track changing values inside the component
+import { api } from "../lib/api";
 
 // Describes the shape of an article object.
 // TypeScript uses this to make sure we never accidentally pass the wrong data.
@@ -36,11 +37,7 @@ export default function AdminArticleRow({
     setDeleting(true);
 
     // Send a DELETE request to the backend API for this article.
-    // credentials: "include" sends the auth cookie so the server knows we're logged in.
-    await fetch(`/api/articles/${article.id}`, {
-      method: "DELETE",
-      credentials: "include",
-    });
+    await api.delete(`/articles/${article.id}`);
 
     // Tell the parent component to remove this article from its list
     onDelete(article.id);

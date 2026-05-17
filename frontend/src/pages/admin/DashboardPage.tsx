@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import AdminArticleRow from "../../components/AdminArticleRow";
+import { api } from "../../lib/api";
 
 interface Article { id: number; title: string; slug: string; published: boolean; createdAt: string; }
 interface ArticlesResponse { articles: Article[]; total: number; }
@@ -13,9 +14,13 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/articles?admin=true&page=1", { credentials: "include" })
-      .then((r) => r.json())
-      .then((d: ArticlesResponse) => { setArticles(d.articles ?? []); setTotal(d.total ?? 0); setLoading(false); })
+    api
+      .get("/articles?admin=true&page=1")
+      .then((d: ArticlesResponse) => {
+        setArticles(d.articles ?? []);
+        setTotal(d.total ?? 0);
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, []);
 

@@ -1,15 +1,19 @@
+import { useState } from "react";
+import ContactModal from "../components/ContactModal";
+
 export default function AboutPage() {
+  const [showContact, setShowContact] = useState(false);
   const highlights = [
     { label: "Published Works",  value: "[Books, articles, or publications]" },
-    { label: "Speaking",         value: "[Conferences, podcasts, or events]" },
-    { label: "Awards",           value: "[Recognition or nominations]" },
-    { label: "Education",        value: "[Degrees, institutions, or training]" },
+    { label: "Speaking",         value: "Beyond the Armor Podcast" },
+    { label: "Awards",           value: "Honors: AI-Applied Engineering (CodePath)" },
+    { label: "Education",        value: "M.A. Clinical Mental Health Counseling (Webster University); B.S. Child, Youth & Development, Minor in Biblical Studies" },
   ];
   const social = [
     { label: "Twitter / X", href: "#" },
-    { label: "LinkedIn",    href: "#" },
+    { label: "LinkedIn",    href: "https://www.linkedin.com/in/seth-johnson-10a6a217b/" },
     { label: "Goodreads",   href: "#" },
-    { label: "Email",       href: "mailto:author@example.com" },
+    { label: "Email",       href: "contact" },
   ];
 
   return (
@@ -26,20 +30,21 @@ export default function AboutPage() {
       </header>
 
       {/* Bio card */}
-      <section className="card no-lift" style={{ padding: "2.75rem", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2.75rem", alignItems: "start", marginBottom: "2rem" }}>
-        <div
+      <section className="card no-lift" style={{ padding: "2.75rem", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2.75rem", alignItems: "flex-start", marginBottom: "2rem" }}>
+        <img
+          src="/Proifleofficepic.png"
+          alt="Seth Johnson"
           style={{
             width: "155px", height: "195px", flexShrink: 0, borderRadius: "0.6rem",
-            background: "linear-gradient(160deg, #EFE9DE 0%, #E0D8CC 100%)",
+            objectFit: "cover", objectPosition: "center",
             border: "1px solid #D8D0C4",
-            display: "flex", alignItems: "center", justifyContent: "center",
             boxShadow: "0 2px 12px rgba(28,25,23,0.08)",
+            imageRendering: "auto",
+            WebkitFontSmoothing: "antialiased",
+            backfaceVisibility: "hidden",
+            marginTop: "8rem",
           }}
-        >
-          <span style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.65rem", letterSpacing: "0.1em", textTransform: "uppercase", textAlign: "center" }}>
-            Author<br />Photo
-          </span>
-        </div>
+        />
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
           <div>
@@ -49,10 +54,10 @@ export default function AboutPage() {
             </p>
           </div>
           <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#4A4540", lineHeight: 1.85, margin: 0, fontSize: "0.97rem" }}>
-            Seth Johnson is a Software Engineer and Mental Health Therapist with a passion for educating kids from impoverished communities. Born and raised in Georgia, Seth has spent over a decade in human services, including serving as a former Residential Director at the organization formerly known as Carolina Youth and Development.
+            Seth Johnson is a Software Engineer and Mental Health Therapist with a passion for educating kids from impoverished communities. Born and raised in Georgia, Seth has spent over a decade in human services, including serving as a former Residential Program Director at Landmark for Families in Charleston, South Carolina.
           </p>
           <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#6B6560", lineHeight: 1.85, margin: 0, fontSize: "0.95rem" }}>
-            [Second paragraph — background, education, or defining experiences that shaped Seth's work and writing.]
+            With a <span style={{ fontWeight: 600, color: "#4A4540" }}>Master's in Clinical Mental Health Counseling</span> and a decade of community work, Seth's transition to technology was intentional—an expansion of his mission, not an escape. A <span style={{ fontWeight: 600, color: "#4A4540" }}>Code The Dream full-stack graduate</span> with certifications in <span style={{ fontWeight: 600, color: "#4A4540" }}>AI Applied Engineering and Technical Interviewing through CodePath</span>, Seth combines deep expertise in React and Node.js with his commitment to equity. Today, as a <span style={{ fontWeight: 600, color: "#4A4540" }}>CodePath Tech Fellow and Code The Dream mentor</span>, he uses technology to expand opportunity in underserved communities.
           </p>
         </div>
       </section>
@@ -74,11 +79,40 @@ export default function AboutPage() {
       <section className="card no-lift" style={{ padding: "2rem 2.5rem" }}>
         <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.35rem", fontWeight: 700, color: "#0F1B35", marginBottom: "1.25rem" }}>Connect</h2>
         <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
-          {social.map(({ label, href }) => (
-            <a key={label} href={href} className="btn-outline" style={{ borderRadius: "2rem" }}>{label}</a>
-          ))}
+          {social.map(({ label, href }) => {
+            const isExternal = href.startsWith("http");
+            const isContact = href === "contact";
+
+            if (isContact) {
+              return (
+                <button
+                  key={label}
+                  onClick={() => setShowContact(true)}
+                  className="btn-outline"
+                  style={{ borderRadius: "2rem", border: "1px solid rgba(184, 150, 46, 0.45)" }}
+                >
+                  {label}
+                </button>
+              );
+            }
+
+            return (
+              <a
+                key={label}
+                href={href}
+                className="btn-outline"
+                style={{ borderRadius: "2rem" }}
+                target={isExternal ? "_blank" : undefined}
+                rel={isExternal ? "noopener noreferrer" : undefined}
+              >
+                {label}
+              </a>
+            );
+          })}
         </div>
       </section>
+
+      <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ArticleCard from "../components/ArticleCard";
 import Pagination from "../components/Pagination";
+import { api } from "../lib/api";
 
 interface Article {
   title: string;
@@ -47,8 +48,8 @@ export default function ArticlesPage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/articles?page=${page}`)
-      .then((r) => r.json())
+    api
+      .get(`/articles?page=${page}`)
       .then((d: ArticlesResponse) => {
         setArticles(d.articles ?? []);
         setTotal(d.total ?? 0);

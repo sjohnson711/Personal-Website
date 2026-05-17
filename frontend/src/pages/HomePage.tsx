@@ -1,6 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ArticleCard from "../components/ArticleCard";
+import HeroImageCarousel from "../components/HeroImageCarousel";
+import { api } from "../lib/api";
 
 interface Article {
   title: string;
@@ -15,6 +17,87 @@ function formatDate(d: string) {
     month: "long",
     day: "numeric",
   });
+}
+
+function NewsletterSection() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [msg, setMsg] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    try {
+      const data = await api.post("/subscribers", { email });
+      setStatus("success");
+      setMsg(data.message ?? "Subscribed!");
+      setEmail("");
+    } catch (err) {
+      setStatus("error");
+      setMsg(
+        err instanceof Error ? err.message : "Network error — please try again."
+      );
+    }
+  }
+
+  return (
+    <section style={{ paddingBottom: "7rem" }}>
+      <div style={{ background: "#0F1B35", borderRadius: "1rem", padding: "3.5rem 4rem",
+                    display: "grid", gridTemplateColumns: "1fr auto", gap: "3rem",
+                    alignItems: "center", boxShadow: "0 8px 40px rgba(15,27,53,0.18)" }}>
+        <div>
+          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#B8962E", fontSize: "0.7rem",
+                      fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
+                      marginBottom: "0.6rem" }}>Newsletter</p>
+          <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif', fontSize: "1.65rem",
+                       fontWeight: 700, color: "#F7F4EF", margin: "0 0 0.6rem", lineHeight: 1.2 }}>
+            Stay in the Loop
+          </h2>
+          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#9A9490", fontSize: "0.95rem",
+                      lineHeight: 1.65, margin: 0 }}>
+            Weekly articles on faith, tech, mental health, and community — delivered to your inbox.
+            Unsubscribe anytime.
+          </p>
+        </div>
+
+        <div style={{ flexShrink: 0 }}>
+          <form onSubmit={handleSubmit} style={{ display: "flex", gap: "0.75rem" }}>
+            <input
+              type="email"
+              required
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={status === "loading" || status === "success"}
+              style={{ padding: "0.72rem 1rem", borderRadius: "0.5rem",
+                       border: "1px solid rgba(255,255,255,0.12)",
+                       background: "rgba(255,255,255,0.07)", color: "#F7F4EF",
+                       fontSize: "0.93rem", fontFamily: '"DM Sans",sans-serif',
+                       outline: "none", minWidth: "220px" }}
+            />
+            <button
+              type="submit"
+              disabled={status === "loading" || status === "success"}
+              style={{ padding: "0.72rem 1.6rem", borderRadius: "0.5rem",
+                       background: status === "success" ? "#40916C" : "#B8962E",
+                       color: "#0F1B35", fontFamily: '"DM Sans",sans-serif',
+                       fontWeight: 700, fontSize: "0.92rem", border: "none",
+                       cursor: status === "loading" || status === "success" ? "default" : "pointer",
+                       whiteSpace: "nowrap" }}>
+              {status === "loading" ? "Subscribing…" : status === "success" ? "Subscribed ✓" : "Subscribe"}
+            </button>
+          </form>
+          {msg && (
+            <p style={{ marginTop: "0.6rem", fontSize: "0.82rem",
+                        color: status === "success" ? "#40916C" : "#E57373",
+                        fontFamily: '"DM Sans",sans-serif' }}>
+              {msg}
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function useScrollReveal(count: number) {
@@ -42,8 +125,8 @@ export default function HomePage() {
   const [latest, setLatest] = useState<Article[]>([]);
 
   useEffect(() => {
-    fetch("/api/articles?page=1")
-      .then((r) => r.json())
+    api
+      .get("/articles?page=1")
       .then((d: { articles?: Article[] }) =>
         setLatest((d.articles ?? []).slice(0, 3)),
       )
@@ -82,22 +165,10 @@ export default function HomePage() {
             zIndex: 1,
           }}
         >
+          <HeroImageCarousel />
           <img
-            src="/hero-kids-tech.jpg"
-            alt="Diverse children in a classroom learning environment"
-            style={{
-              gridColumn: "1",
-              gridRow: "1 / 3",
-              objectFit: "cover",
-              borderRadius: "0.75rem",
-              width: "100%",
-              height: "100%",
-              boxShadow: "0 8px 32px rgba(28,25,23,0.12)",
-            }}
-          />
-          <img
-            src="/hero-men-talking.jpg"
-            alt="People collaborating and in conversation"
+            src="/hero-woman-tech.jpg"
+            alt="Woman of color working in tech"
             style={{
               gridColumn: "2",
               gridRow: "1",
@@ -144,9 +215,9 @@ export default function HomePage() {
                 lineHeight: 1.4,
               }}
             >
-              Articles on Tech,
+              Faith to Mind &
               <br />
-              Mind & Community
+              Community
             </span>
           </div>
         </div>
@@ -221,6 +292,54 @@ export default function HomePage() {
               >
                 {latest[0].excerpt}
               </p>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "1rem",
+                  padding: "1.25rem",
+                  borderRadius: "0.75rem",
+                  background: "rgba(184,150,46,0.08)",
+                  border: "1px solid rgba(184,150,46,0.15)",
+                }}
+              >
+                <img
+                  src="/profile library pic.png"
+                  alt="Seth Johnson"
+                  style={{
+                    width: "60px",
+                    height: "60px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    flexShrink: 0,
+                    border: "2px solid rgba(184,150,46,0.3)",
+                  }}
+                />
+                <div>
+                  <p
+                    style={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      fontWeight: 700,
+                      color: "#0F1B35",
+                      fontSize: "0.9rem",
+                      margin: "0 0 0.25rem",
+                    }}
+                  >
+                    Seth Johnson
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: '"DM Sans", sans-serif',
+                      color: "#6B6560",
+                      fontSize: "0.8rem",
+                      margin: 0,
+                    }}
+                  >
+                    Author & Creator
+                  </p>
+                </div>
+              </div>
 
               <div style={{ display: "flex", gap: "0.9rem", flexWrap: "wrap" }}>
                 <Link
@@ -369,98 +488,7 @@ export default function HomePage() {
       )}
 
       {/* ── Newsletter ───────────────────────────────────── */}
-      <section style={{ paddingBottom: "7rem" }}>
-        <div
-          style={{
-            background: "#0F1B35",
-            borderRadius: "1rem",
-            padding: "3.5rem 4rem",
-            display: "grid",
-            gridTemplateColumns: "1fr auto",
-            gap: "3rem",
-            alignItems: "center",
-            boxShadow: "0 8px 40px rgba(15,27,53,0.18)",
-          }}
-        >
-          <div>
-            <p
-              style={{
-                fontFamily: '"DM Sans", sans-serif',
-                color: "#B8962E",
-                fontSize: "0.7rem",
-                fontWeight: 700,
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                marginBottom: "0.6rem",
-              }}
-            >
-              Newsletter
-            </p>
-            <h2
-              style={{
-                fontFamily: '"Playfair Display", Georgia, serif',
-                fontSize: "1.65rem",
-                fontWeight: 700,
-                color: "#F7F4EF",
-                margin: "0 0 0.6rem",
-                lineHeight: 1.2,
-              }}
-            >
-              Stay in the Loop
-            </h2>
-            <p
-              style={{
-                fontFamily: '"DM Sans", sans-serif',
-                color: "#9A9490",
-                fontSize: "0.95rem",
-                lineHeight: 1.65,
-                margin: 0,
-              }}
-            >
-              Weekly articles on tech, mental health, and community — delivered
-              to your inbox. Unsubscribe anytime.
-            </p>
-          </div>
-
-          <form
-            onSubmit={(e) => e.preventDefault()}
-            style={{ display: "flex", gap: "0.75rem", flexShrink: 0 }}
-          >
-            <input
-              type="email"
-              placeholder="your@email.com"
-              style={{
-                padding: "0.72rem 1rem",
-                borderRadius: "0.5rem",
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(255,255,255,0.07)",
-                color: "#F7F4EF",
-                fontSize: "0.93rem",
-                fontFamily: '"DM Sans", sans-serif',
-                outline: "none",
-                minWidth: "220px",
-              }}
-            />
-            <button
-              type="submit"
-              style={{
-                padding: "0.72rem 1.6rem",
-                borderRadius: "0.5rem",
-                background: "#B8962E",
-                color: "#0F1B35",
-                fontFamily: '"DM Sans", sans-serif',
-                fontWeight: 700,
-                fontSize: "0.92rem",
-                border: "none",
-                cursor: "pointer",
-                whiteSpace: "nowrap",
-              }}
-            >
-              Subscribe
-            </button>
-          </form>
-        </div>
-      </section>
+      <NewsletterSection />
     </div>
   );
 }
