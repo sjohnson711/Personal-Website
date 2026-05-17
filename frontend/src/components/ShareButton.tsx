@@ -12,6 +12,7 @@ export default function ShareButton({ title, excerpt }: ShareButtonProps) {
   const url = window.location.href;
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
+  const encodedExcerpt = encodeURIComponent(excerpt);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(url);
@@ -111,7 +112,7 @@ export default function ShareButton({ title, excerpt }: ShareButtonProps) {
               gap: "0.5rem",
             }}
           >
-            {!!navigator.share && (
+            {typeof navigator !== "undefined" && navigator.share && (
               <>
                 <button
                   onClick={handleNativeShare}

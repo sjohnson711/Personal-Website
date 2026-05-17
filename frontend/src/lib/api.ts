@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-const API_BASE = import.meta.env.VITE_API_URL || "/api";
+const API_BASE = (import.meta.env as any).VITE_API_URL || "/api";
 
 interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
