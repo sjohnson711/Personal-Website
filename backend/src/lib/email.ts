@@ -1,13 +1,13 @@
 import { Resend } from "resend";
 import { prisma } from "./prisma";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function notifySubscribers(article: {
   title: string;
   slug: string;
   excerpt: string;
 }): Promise<void> {
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
   const subscribers = await prisma.subscriber.findMany();
   if (subscribers.length === 0) return;
 

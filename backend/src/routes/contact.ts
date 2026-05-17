@@ -2,10 +2,10 @@ import { Router, Request, Response } from "express";
 import { Resend } from "resend";
 
 const router = Router();
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 router.post("/", async (req: Request, res: Response) => {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { name, email, message } = req.body;
 
     if (!name || !email || !message) {
