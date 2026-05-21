@@ -28,6 +28,24 @@
 }
 
 /* ─────────────────────────────────────────────────────────
+   ACCESSIBILITY UTILITIES
+───────────────────────────────────────────────────────── */
+/* .sr-only: visible to screen readers only. Use on <label> elements when the
+   visual design can't accommodate a label but the input still needs an
+   accessible name. WHATWG-recommended implementation. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ─────────────────────────────────────────────────────────
    RESET & BASE
 ───────────────────────────────────────────────────────── */
 *,
@@ -623,3 +641,73 @@ body::after {
     display: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────────
+   RESPONSIVE LAYER — mobile-first overrides (<768px)
+   Targets class-based utilities. Inline-style overrides
+   are handled per-component via useMediaQuery.
+───────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .prose-ink h1 {
+    font-size: 1.35rem;
+  }
+  .prose-ink h2 {
+    font-size: 1.15rem;
+  }
+  .prose-ink h3 {
+    font-size: 1.05rem;
+  }
+  .prose-ink p,
+  .prose-ink li {
+    font-size: 0.95rem;
+  }
+  .prose-ink pre {
+    padding: 0.9rem 1rem;
+    font-size: 0.78rem;
+    overflow-x: auto;
+  }
+  .prose-ink code {
+    word-break: break-word;
+  }
+  .prose-ink img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    padding: 0.6rem 1.25rem;
+    font-size: 0.85rem;
+  }
+  .btn-outline {
+    padding: 0.45rem 1rem;
+    font-size: 0.78rem;
+  }
+
+  .field-input {
+    padding: 0.65rem 0.85rem;
+    font-size: 16px; /* prevents iOS auto-zoom on focus */
+  }
+  .field-label {
+    font-size: 0.7rem;
+  }
+
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .hero-orb-gold,
+  .hero-orb-navy {
+    display: none; /* huge fixed-px orbs overflow + waste CPU on mobile */
+  }
+
+  .glass-card,
+  .card {
+    border-radius: 0.625rem;
+  }
+}
+

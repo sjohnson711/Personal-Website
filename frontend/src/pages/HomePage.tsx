@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import ArticleCard from "../components/ArticleCard";
 import HeroImageCarousel from "../components/HeroImageCarousel";
 import { api } from "../lib/api";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 interface Article {
   title: string;
@@ -23,6 +24,7 @@ function NewsletterSection() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [msg, setMsg] = useState("");
+  const isMobile = useIsMobile();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,30 +43,44 @@ function NewsletterSection() {
   }
 
   return (
-    <section style={{ paddingBottom: "7rem" }}>
-      <div style={{ background: "#0F1B35", borderRadius: "1rem", padding: "3.5rem 4rem",
-                    display: "grid", gridTemplateColumns: "1fr auto", gap: "3rem",
+    <section style={{ paddingBottom: isMobile ? "4rem" : "7rem" }}>
+      <div style={{ background: "#0F1B35", borderRadius: "1rem",
+                    padding: isMobile ? "2rem 1.5rem" : "3.5rem 4rem",
+                    display: "grid",
+                    gridTemplateColumns: isMobile ? "1fr" : "1fr auto",
+                    gap: isMobile ? "1.5rem" : "3rem",
                     alignItems: "center", boxShadow: "0 8px 40px rgba(15,27,53,0.18)" }}>
         <div>
           <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#B8962E", fontSize: "0.7rem",
                       fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
                       marginBottom: "0.6rem" }}>Newsletter</p>
-          <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif', fontSize: "1.65rem",
+          <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif',
+                       fontSize: isMobile ? "1.35rem" : "1.65rem",
                        fontWeight: 700, color: "#F7F4EF", margin: "0 0 0.6rem", lineHeight: 1.2 }}>
             Stay in the Loop
           </h2>
-          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#9A9490", fontSize: "0.95rem",
+          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#9A9490",
+                      fontSize: isMobile ? "0.9rem" : "0.95rem",
                       lineHeight: 1.65, margin: 0 }}>
             Weekly articles on faith, tech, mental health, and community — delivered to your inbox.
             Unsubscribe anytime.
           </p>
         </div>
 
-        <div style={{ flexShrink: 0 }}>
-          <form onSubmit={handleSubmit} style={{ display: "flex", gap: "0.75rem" }}>
+        <div style={{ flexShrink: 0, width: isMobile ? "100%" : "auto" }}>
+          <form onSubmit={handleSubmit} aria-labelledby="newsletter-heading"
+                style={{ display: "flex",
+                         flexDirection: isMobile ? "column" : "row",
+                         gap: "0.75rem" }}>
+            {/* Visually-hidden label keeps the design intact while giving the input
+                a screen-reader-accessible name. The id ties the label to the input. */}
+            <label htmlFor="newsletter-email" className="sr-only">Email address</label>
             <input
+              id="newsletter-email"
               type="email"
               required
+              aria-required="true"
+              aria-describedby={msg ? "newsletter-status" : undefined}
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -72,8 +88,11 @@ function NewsletterSection() {
               style={{ padding: "0.72rem 1rem", borderRadius: "0.5rem",
                        border: "1px solid rgba(255,255,255,0.12)",
                        background: "rgba(255,255,255,0.07)", color: "#F7F4EF",
-                       fontSize: "0.93rem", fontFamily: '"DM Sans",sans-serif',
-                       outline: "none", minWidth: "220px" }}
+                       fontSize: isMobile ? "16px" : "0.93rem",
+                       fontFamily: '"DM Sans",sans-serif',
+                       outline: "none",
+                       minWidth: isMobile ? 0 : "220px",
+                       width: isMobile ? "100%" : "auto" }}
             />
             <button
               type="submit"
@@ -87,13 +106,19 @@ function NewsletterSection() {
               {status === "loading" ? "Subscribing…" : status === "success" ? "Subscribed ✓" : "Subscribe"}
             </button>
           </form>
-          {msg && (
-            <p style={{ marginTop: "0.6rem", fontSize: "0.82rem",
-                        color: status === "success" ? "#40916C" : "#E57373",
-                        fontFamily: '"DM Sans",sans-serif' }}>
-              {msg}
-            </p>
-          )}
+          {/* aria-live="polite" so screen readers announce the success / error message
+              after submit. role switches to "alert" on error for an assertive announce. */}
+          <p
+            id="newsletter-status"
+            role={status === "error" ? "alert" : "status"}
+            aria-live="polite"
+            style={{ marginTop: msg ? "0.6rem" : 0, minHeight: msg ? "1rem" : 0,
+                     fontSize: "0.82rem",
+                     color: status === "success" ? "#40916C" : "#E57373",
+                     fontFamily: '"DM Sans",sans-serif' }}
+          >
+            {msg}
+          </p>
         </div>
       </div>
     </section>
@@ -123,6 +148,7 @@ function useScrollReveal(count: number) {
 
 export default function HomePage() {
   const [latest, setLatest] = useState<Article[]>([]);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     api
@@ -136,17 +162,18 @@ export default function HomePage() {
   const cardRefs = useScrollReveal(latest.length);
 
   return (
-    <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "0 1.5rem" }}>
+    <div style={{ maxWidth: "1100px", margin: "0 auto",
+                  padding: isMobile ? "0 1rem" : "0 1.5rem" }}>
       {/* ── Hero ─────────────────────────────────────────── */}
       <section
         style={{
           position: "relative",
           overflow: "hidden",
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "4rem",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+          gap: isMobile ? "2rem" : "4rem",
           alignItems: "center",
-          padding: "7rem 0 6rem",
+          padding: isMobile ? "3rem 0 2.5rem" : "7rem 0 6rem",
           animation: "fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
@@ -159,7 +186,7 @@ export default function HomePage() {
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gridTemplateRows: "230px 175px",
+            gridTemplateRows: isMobile ? "150px 110px" : "230px 175px",
             gap: "0.75rem",
             position: "relative",
             zIndex: 1,
@@ -189,7 +216,7 @@ export default function HomePage() {
               flexDirection: "column",
               alignItems: "flex-start",
               justifyContent: "center",
-              padding: "1.25rem 1.5rem",
+              padding: isMobile ? "0.85rem 1rem" : "1.25rem 1.5rem",
               gap: "0.35rem",
             }}
           >
@@ -197,7 +224,7 @@ export default function HomePage() {
               style={{
                 fontFamily: '"Playfair Display", Georgia, serif',
                 color: "#B8962E",
-                fontSize: "1.65rem",
+                fontSize: isMobile ? "1.1rem" : "1.65rem",
                 fontWeight: 900,
                 lineHeight: 1,
               }}
@@ -208,7 +235,7 @@ export default function HomePage() {
               style={{
                 fontFamily: '"DM Sans", sans-serif',
                 color: "#EFE9DE",
-                fontSize: "0.72rem",
+                fontSize: isMobile ? "0.6rem" : "0.72rem",
                 fontWeight: 500,
                 letterSpacing: "0.08em",
                 textTransform: "uppercase",
@@ -284,7 +311,7 @@ export default function HomePage() {
                 style={{
                   fontFamily: '"DM Sans", sans-serif',
                   color: "#6B6560",
-                  fontSize: "1.05rem",
+                  fontSize: isMobile ? "0.95rem" : "1.05rem",
                   lineHeight: 1.85,
                   maxWidth: "500px",
                   margin: 0,
@@ -298,7 +325,7 @@ export default function HomePage() {
                   display: "flex",
                   alignItems: "center",
                   gap: "1rem",
-                  padding: "1.25rem",
+                  padding: isMobile ? "1rem" : "1.25rem",
                   borderRadius: "0.75rem",
                   background: "rgba(184,150,46,0.08)",
                   border: "1px solid rgba(184,150,46,0.15)",
@@ -422,13 +449,14 @@ export default function HomePage() {
 
       {/* ── Latest Posts ─────────────────────────────────── */}
       {latest.length > 0 && (
-        <section style={{ padding: "6rem 0" }}>
+        <section style={{ padding: isMobile ? "3rem 0" : "6rem 0" }}>
           <div
             style={{
               display: "flex",
               alignItems: "baseline",
               justifyContent: "space-between",
-              marginBottom: "3rem",
+              marginBottom: isMobile ? "1.75rem" : "3rem",
+              gap: "1rem",
             }}
           >
             <div>
@@ -458,6 +486,7 @@ export default function HomePage() {
                 display: "flex",
                 alignItems: "center",
                 gap: "0.25rem",
+                whiteSpace: "nowrap",
               }}
             >
               View all →
@@ -467,8 +496,10 @@ export default function HomePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "1.5rem",
+              gridTemplateColumns: isMobile
+                ? "1fr"
+                : "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: isMobile ? "1rem" : "1.5rem",
             }}
           >
             {latest.map((a, i) => (

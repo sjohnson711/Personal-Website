@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 interface ShareButtonProps {
   title: string;
@@ -8,6 +9,7 @@ interface ShareButtonProps {
 export default function ShareButton({ title, excerpt }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const url = window.location.href;
   const encodedUrl = encodeURIComponent(url);
@@ -93,12 +95,14 @@ export default function ShareButton({ title, excerpt }: ShareButtonProps) {
           style={{
             position: "absolute",
             top: "calc(100% + 0.75rem)",
-            right: 0,
+            right: isMobile ? "auto" : 0,
+            left: isMobile ? 0 : "auto",
             background: "rgba(15,27,53,0.98)",
             border: "1px solid rgba(184,150,46,0.2)",
             borderRadius: "0.75rem",
             padding: "0.75rem",
-            minWidth: "200px",
+            minWidth: isMobile ? "180px" : "200px",
+            maxWidth: isMobile ? "calc(100vw - 2.5rem)" : "none",
             zIndex: 1000,
             backdropFilter: "blur(4px)",
             boxShadow: "0 10px 40px rgba(0,0,0,0.2)",

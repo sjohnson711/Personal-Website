@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom"; // Link is like an <a> tag, but navigates without refreshing the page
 import { useState } from "react"; // useState lets us track changing values inside the component
 import { api } from "../lib/api";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 // Describes the shape of an article object.
 // TypeScript uses this to make sure we never accidentally pass the wrong data.
@@ -27,6 +28,7 @@ export default function AdminArticleRow({
   // Tracks whether a delete request is currently in progress.
   // We use this to disable the button so the user can't click it twice.
   const [deleting, setDeleting] = useState(false);
+  const isMobile = useIsMobile();
 
   // Runs when the user clicks the Delete button
   async function handleDelete() {
@@ -49,6 +51,78 @@ export default function AdminArticleRow({
     day: "numeric",
     year: "numeric",
   });
+
+  if (isMobile) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "0.75rem",
+          padding: "1rem 1.25rem",
+          borderBottom: "1px solid #F0EBE2",
+        }}
+      >
+        <div style={{ minWidth: 0 }}>
+          <p
+            style={{
+              fontFamily: '"DM Sans", sans-serif',
+              color: "#1C1917",
+              fontWeight: 600,
+              fontSize: "0.95rem",
+              margin: 0,
+              lineHeight: 1.35,
+              wordBreak: "break-word",
+            }}
+          >
+            {article.title}
+          </p>
+          <p
+            style={{
+              fontFamily: '"DM Sans", sans-serif',
+              color: "#C4BAB0",
+              fontSize: "0.72rem",
+              margin: "0.25rem 0 0",
+              wordBreak: "break-word",
+            }}
+          >
+            /articles/{article.slug} &middot; {dateStr}
+          </p>
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <span
+            className={
+              article.published ? "badge badge-published" : "badge badge-draft"
+            }
+          >
+            {article.published ? "Published" : "Draft"}
+          </span>
+
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <Link to={`/admin/articles/${article.id}/edit`} className="btn-outline">
+              Edit
+            </Link>
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="btn-danger"
+            >
+              {deleting ? "…" : "Delete"}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     // Outer row — CSS Grid with 3 columns: [title info] [badge] [buttons]

@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import ArticleCard from "../components/ArticleCard";
 import Pagination from "../components/Pagination";
 import { api } from "../lib/api";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 interface Article {
   title: string;
@@ -60,6 +61,7 @@ export default function ArticlesPage() {
   }, [page]);
 
   const cardRefs = useScrollReveal(articles.length);
+  const isMobile = useIsMobile();
 
   return (
     <div
@@ -67,10 +69,10 @@ export default function ArticlesPage() {
       style={{
         maxWidth: "780px",
         margin: "0 auto",
-        padding: "5.5rem 1.5rem 7rem",
+        padding: isMobile ? "3rem 1rem 4rem" : "5.5rem 1.5rem 7rem",
       }}
     >
-      <header style={{ marginBottom: "4rem" }}>
+      <header style={{ marginBottom: isMobile ? "2.25rem" : "4rem" }}>
         <p
           style={{
             fontFamily: '"DM Sans", sans-serif',
@@ -127,7 +129,7 @@ export default function ArticlesPage() {
       ) : articles.length === 0 ? (
         <div
           className="card no-lift"
-          style={{ padding: "4rem", textAlign: "center" }}
+          style={{ padding: isMobile ? "2rem 1.25rem" : "4rem", textAlign: "center" }}
         >
           <p style={{ color: "#A8A29E", fontFamily: '"DM Sans", sans-serif' }}>
             No articles yet — check back soon.

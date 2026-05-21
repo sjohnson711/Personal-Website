@@ -1,8 +1,10 @@
 import { useState } from "react";
 import ContactModal from "../components/ContactModal";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 export default function AboutPage() {
   const [showContact, setShowContact] = useState(false);
+  const isMobile = useIsMobile();
   const highlights = [
     { label: "Published Works",  value: "[Books, articles, or publications]" },
     { label: "Speaking",         value: "Beyond the Armor Podcast" },
@@ -17,9 +19,10 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="fade-up" style={{ maxWidth: "860px", margin: "0 auto", padding: "5.5rem 1.5rem 7rem" }}>
+    <div className="fade-up" style={{ maxWidth: "860px", margin: "0 auto",
+                                       padding: isMobile ? "3rem 1rem 4rem" : "5.5rem 1.5rem 7rem" }}>
 
-      <header style={{ marginBottom: "4rem" }}>
+      <header style={{ marginBottom: isMobile ? "2.25rem" : "4rem" }}>
         <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "0.65rem" }}>
           The Author
         </p>
@@ -30,26 +33,38 @@ export default function AboutPage() {
       </header>
 
       {/* Bio card */}
-      <section className="card no-lift" style={{ padding: "2.75rem", display: "grid", gridTemplateColumns: "auto 1fr", gap: "2.75rem", alignItems: "flex-start", marginBottom: "2rem" }}>
+      <section className="card no-lift" style={{ padding: isMobile ? "1.5rem 1.25rem" : "2.75rem",
+                                                  display: "grid",
+                                                  gridTemplateColumns: isMobile ? "1fr" : "auto 1fr",
+                                                  gap: isMobile ? "1.25rem" : "2.75rem",
+                                                  alignItems: "flex-start",
+                                                  justifyItems: isMobile ? "center" : "stretch",
+                                                  marginBottom: "2rem" }}>
         <img
           src="/Proifleofficepic.png"
           alt="Seth Johnson"
           style={{
-            width: "155px", height: "195px", flexShrink: 0, borderRadius: "0.6rem",
+            width: isMobile ? "130px" : "155px",
+            height: isMobile ? "165px" : "195px",
+            flexShrink: 0, borderRadius: "0.6rem",
             objectFit: "cover", objectPosition: "center",
             border: "1px solid #D8D0C4",
             boxShadow: "0 2px 12px rgba(28,25,23,0.08)",
             imageRendering: "auto",
             WebkitFontSmoothing: "antialiased",
             backfaceVisibility: "hidden",
-            marginTop: "8rem",
+            marginTop: isMobile ? 0 : "8rem",
           }}
         />
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem", width: "100%" }}>
           <div>
-            <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.65rem", fontWeight: 700, color: "#0F1B35", margin: "0 0 0.3rem" }}>Seth Johnson</h2>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
+            <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
+                         fontSize: isMobile ? "1.35rem" : "1.65rem",
+                         fontWeight: 700, color: "#0F1B35", margin: "0 0 0.3rem",
+                         textAlign: isMobile ? "center" : "left" }}>Seth Johnson</h2>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0,
+                        textAlign: isMobile ? "center" : "left" }}>
               Software Engineer &amp; Mental Health Therapist
             </p>
           </div>
@@ -64,8 +79,12 @@ export default function AboutPage() {
 
       {/* Highlights */}
       <section style={{ marginBottom: "2rem" }}>
-        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.35rem", fontWeight: 700, color: "#0F1B35", marginBottom: "1.25rem" }}>Highlights</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(195px, 1fr))", gap: "1rem" }}>
+        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
+                     fontSize: isMobile ? "1.2rem" : "1.35rem",
+                     fontWeight: 700, color: "#0F1B35", marginBottom: "1.25rem" }}>Highlights</h2>
+        <div style={{ display: "grid",
+                      gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(195px, 1fr))",
+                      gap: "1rem" }}>
           {highlights.map(({ label, value }) => (
             <div key={label} style={{ background: "#FFFFFF", border: "1px solid #EAE4D8", borderRadius: "0.75rem", padding: "1.25rem", boxShadow: "0 1px 4px rgba(28,25,23,0.05)" }}>
               <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", margin: "0 0 0.5rem" }}>{label}</p>
@@ -76,8 +95,10 @@ export default function AboutPage() {
       </section>
 
       {/* Connect */}
-      <section className="card no-lift" style={{ padding: "2rem 2.5rem" }}>
-        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.35rem", fontWeight: 700, color: "#0F1B35", marginBottom: "1.25rem" }}>Connect</h2>
+      <section className="card no-lift" style={{ padding: isMobile ? "1.5rem 1.25rem" : "2rem 2.5rem" }}>
+        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
+                     fontSize: isMobile ? "1.2rem" : "1.35rem",
+                     fontWeight: 700, color: "#0F1B35", marginBottom: "1.25rem" }}>Connect</h2>
         <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
           {social.map(({ label, href }) => {
             const isExternal = href.startsWith("http");

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 interface ArticleCardProps { title: string; slug: string; excerpt: string; createdAt: string | Date; }
 
@@ -7,10 +8,12 @@ function formatDate(d: string | Date) {
 }
 
 export default function ArticleCard({ title, slug, excerpt, createdAt }: ArticleCardProps) {
+  const isMobile = useIsMobile();
   return (
     <article
       className="card"
-      style={{ padding: "1.75rem 2rem", display: "flex", flexDirection: "column", gap: "0.8rem" }}
+      style={{ padding: isMobile ? "1.25rem 1.25rem" : "1.75rem 2rem",
+               display: "flex", flexDirection: "column", gap: "0.8rem" }}
     >
       <time
         dateTime={new Date(createdAt).toISOString()}
@@ -22,7 +25,9 @@ export default function ArticleCard({ title, slug, excerpt, createdAt }: Article
       <h2 style={{ margin: 0 }}>
         <Link
           to={`/articles/${slug}`}
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.2rem", fontWeight: 700, color: "#0F1B35", textDecoration: "none", lineHeight: 1.3 }}
+          style={{ fontFamily: '"Playfair Display", Georgia, serif',
+                   fontSize: isMobile ? "1.05rem" : "1.2rem",
+                   fontWeight: 700, color: "#0F1B35", textDecoration: "none", lineHeight: 1.3 }}
         >
           {title}
         </Link>

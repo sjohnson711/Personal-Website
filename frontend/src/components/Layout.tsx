@@ -1,7 +1,9 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import { useIsMobile } from "../lib/useMediaQuery";
 
 export default function Layout() {
+  const isMobile = useIsMobile();
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", background: "#F7F4EF" }}>
       <Navbar />
@@ -14,8 +16,8 @@ export default function Layout() {
         style={{
           borderTop: "1px solid #E5DDD4",
           background: "#F0EBE2",
-          padding: "2.5rem 1.5rem",
-          marginTop: "5rem",
+          padding: isMobile ? "1.75rem 1rem" : "2.5rem 1.5rem",
+          marginTop: isMobile ? "2.5rem" : "5rem",
         }}
       >
         <div
@@ -23,10 +25,10 @@ export default function Layout() {
             maxWidth: "1100px",
             margin: "0 auto",
             display: "flex",
-            alignItems: "center",
+            alignItems: isMobile ? "flex-start" : "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "1rem",
+            gap: isMobile ? "0.75rem" : "1rem",
           }}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: "0.2rem" }}>
