@@ -6,10 +6,10 @@ export default function AboutPage() {
   const [showContact, setShowContact] = useState(false);
   const isMobile = useIsMobile();
   const highlights = [
-    { label: "Published Works",  value: "[Books, articles, or publications]" },
+    { label: "Volunteer Work",  value: "CodeTheDream Tech Mentor" },
     { label: "Speaking",         value: "Beyond the Armor Podcast" },
     { label: "Awards",           value: "Honors: AI-Applied Engineering (CodePath)" },
-    { label: "Education",        value: "M.A. Clinical Mental Health Counseling (Webster University); B.S. Child, Youth & Development, Minor in Biblical Studies" },
+    { label: "Education",        value: "M.A. Clinical Mental Health Counseling (Webster University); /n Full-Stack Software Engineering (Code The Dream)" },
   ];
   const social = [
     { label: "LinkedIn",    href: "https://www.linkedin.com/in/seth-johnson-10a6a217b/" },
