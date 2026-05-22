@@ -4,15 +4,11 @@ import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
 
-// bad-words v4 is ESM-only; cache one Filter instance loaded via dynamic import
-// so this compiles cleanly under CommonJS and only pays the import cost once.
-let filterPromise: Promise<{ isProfane(s: string): boolean }> | null = null;
-function getFilter() {
-  if (!filterPromise) {
-    filterPromise = import("bad-words").then((mod) => new mod.Filter());
-  }
-  return filterPromise;
-}
+// bad-words v3 is CommonJS and ships no types; declare the minimal surface we use.
+type BadWordsCtor = new () => { isProfane(input: string): boolean };
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const Filter: BadWordsCtor = require("bad-words");
+const profanityFilter = new Filter();
 
 // GET /api/comments/:articleId — list all comments for an article
 router.get(
@@ -63,8 +59,7 @@ router.post(
       return;
     }
 
-    const filter = await getFilter();
-    if (filter.isProfane(name) || filter.isProfane(body)) {
+    if (profanityFilter.isProfane(name) || profanityFilter.isProfane(body)) {
       res.status(400).json({
         error:
           "Please keep messages respectful. Your comment contains language that isn't allowed.",
