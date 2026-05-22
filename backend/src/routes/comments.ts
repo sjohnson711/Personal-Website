@@ -1,7 +1,18 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { requireAuth } from "../middleware/requireAuth";
 
 const router = Router();
+
+// bad-words v4 is ESM-only; cache one Filter instance loaded via dynamic import
+// so this compiles cleanly under CommonJS and only pays the import cost once.
+let filterPromise: Promise<{ isProfane(s: string): boolean }> | null = null;
+function getFilter() {
+  if (!filterPromise) {
+    filterPromise = import("bad-words").then((mod) => new mod.Filter());
+  }
+  return filterPromise;
+}
 
 // GET /api/comments/:articleId — list all comments for an article
 router.get(
@@ -52,6 +63,15 @@ router.post(
       return;
     }
 
+    const filter = await getFilter();
+    if (filter.isProfane(name) || filter.isProfane(body)) {
+      res.status(400).json({
+        error:
+          "Please keep messages respectful. Your comment contains language that isn't allowed.",
+      });
+      return;
+    }
+
     const article = await prisma.article.findUnique({
       where: { id: articleId },
     });
@@ -66,6 +86,28 @@ router.post(
     });
 
     res.status(201).json(comment);
+  },
+);
+
+// DELETE /api/comments/:id — admin-only, remove a single comment
+router.delete(
+  "/:id",
+  requireAuth,
+  async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Invalid comment ID" });
+      return;
+    }
+
+    const existing = await prisma.comment.findUnique({ where: { id } });
+    if (!existing) {
+      res.status(404).json({ error: "Comment not found" });
+      return;
+    }
+
+    await prisma.comment.delete({ where: { id } });
+    res.json({ success: true });
   },
 );
 

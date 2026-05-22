@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
+import { useAuth } from "../context/AuthContext";
 import { useIsMobile } from "../lib/useMediaQuery";
 
 interface Comment { id: number; name: string; body: string; createdAt: string; }
@@ -14,9 +15,12 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
   const [name, setName] = useState("");
   const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const isMobile = useIsMobile();
+  const { email: adminEmail } = useAuth();
+  const isAdmin = Boolean(adminEmail);
 
   useEffect(() => {
     api
@@ -46,6 +50,21 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
       );
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function handleDelete(commentId: number) {
+    if (!confirm("Delete this reader message? This cannot be undone.")) return;
+    setDeletingId(commentId);
+    try {
+      await api.delete(`/comments/${commentId}`);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Could not delete the message. Please try again."
+      );
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -79,7 +98,21 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
             >
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.55rem", flexWrap: "wrap" }}>
                 <span style={{ fontFamily: '"DM Sans", sans-serif', color: "#0F1B35", fontWeight: 700, fontSize: "0.88rem" }}>{c.name}</span>
-                <time style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.72rem" }}>{formatDate(c.createdAt)}</time>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <time style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.72rem" }}>{formatDate(c.createdAt)}</time>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(c.id)}
+                      disabled={deletingId === c.id}
+                      aria-label={`Delete message from ${c.name}`}
+                      className="btn-danger"
+                      style={{ padding: "0.2rem 0.55rem", fontSize: "0.7rem", lineHeight: 1.2 }}
+                    >
+                      {deletingId === c.id ? "…" : "Delete"}
+                    </button>
+                  )}
+                </div>
               </div>
               <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#4A4540", lineHeight: 1.75, fontSize: "0.92rem", margin: 0, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
                 {c.body}
