@@ -12,9 +12,7 @@ export default function AboutPage() {
     { label: "Education",        value: "M.A. Clinical Mental Health Counseling (Webster University); B.S. Child, Youth & Development, Minor in Biblical Studies" },
   ];
   const social = [
-    { label: "Twitter / X", href: "#" },
     { label: "LinkedIn",    href: "https://www.linkedin.com/in/seth-johnson-10a6a217b/" },
-    { label: "Goodreads",   href: "#" },
     { label: "Email",       href: "contact" },
   ];
 
