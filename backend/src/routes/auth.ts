@@ -32,10 +32,12 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
     { expiresIn: "7d" },
   );
 
+  const isProd = process.env.NODE_ENV === "production";
+
   res.cookie("token", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -43,7 +45,13 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
 });
 
 router.post("/logout", (_req: Request, res: Response): void => {
-  res.clearCookie("token");
+  const isProd = process.env.NODE_ENV === "production";
+
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+  });
   res.json({ success: true });
 });
 
