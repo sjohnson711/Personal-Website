@@ -113,7 +113,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
       <div>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.42rem" }}>
           <label htmlFor="article-content" className="field-label" style={{ marginBottom: 0 }}>Content</label>
-          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.7rem" }}>Markdown supported</span>
+          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.7rem" }}>Markdown supported · a link on its own line becomes a rich embed</span>
         </div>
         <textarea
           id="article-content"

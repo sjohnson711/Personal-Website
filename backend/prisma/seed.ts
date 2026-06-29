@@ -2,6 +2,8 @@ import "dotenv/config";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env" });
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -16,12 +18,12 @@ async function main() {
     where: { email: "admin@yoursite.com" },
     update: { password: hashedPassword },
     create: {
-      email: "admin@yoursite.com",
+      email: process.env.ADMIN_EMAIL || "admin@yoursite.com",
       password: hashedPassword,
     },
   });
 
-  console.log("✓ Admin account seeded: admin@yoursite.com");
+  console.log("✓ Admin account seeded: " + (process.env.ADMIN_EMAIL || "admin@yoursite.com"));
   console.log("  Password loaded from ADMIN_PASSWORD env variable.");
 
   const sampleArticles = [

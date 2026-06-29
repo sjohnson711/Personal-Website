@@ -40,3 +40,18 @@ model Subscriber {
   unsubscribeToken String   @unique
   createdAt        DateTime @default(now())
 }
+
+model EmbedCache {
+  id          Int      @id @default(autoincrement())
+  url         String   @unique
+  type        String // 'card' | 'video'
+  title       String?
+  description String?
+  image       String?
+  provider    String?
+  embedHtml   String?
+  ok          Boolean  @default(true) // false = negative cache for failed/blocked fetches
+  fetchedAt   DateTime @default(now())
+
+  @@index([fetchedAt])
+}

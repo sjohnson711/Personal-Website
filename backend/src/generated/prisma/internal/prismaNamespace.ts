@@ -80,12 +80,12 @@ export type PrismaVersion = {
 }
 
 /**
- * Prisma Client JS version: 7.6.0
- * Query Engine version: 75cbdc1eb7150937890ad5465d861175c6624711
+ * Prisma Client JS version: 7.4.2
+ * Query Engine version: 94a226be1cf2967af2541cca5529f0f7ba866919
  */
 export const prismaVersion: PrismaVersion = {
-  client: "7.6.0",
-  engine: "75cbdc1eb7150937890ad5465d861175c6624711"
+  client: "7.4.2",
+  engine: "94a226be1cf2967af2541cca5529f0f7ba866919"
 }
 
 /**
@@ -387,7 +387,8 @@ export const ModelName = {
   Article: 'Article',
   Comment: 'Comment',
   Admin: 'Admin',
-  Subscriber: 'Subscriber'
+  Subscriber: 'Subscriber',
+  EmbedCache: 'EmbedCache'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "article" | "comment" | "admin" | "subscriber"
+    modelProps: "article" | "comment" | "admin" | "subscriber" | "embedCache"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -703,6 +704,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    EmbedCache: {
+      payload: Prisma.$EmbedCachePayload<ExtArgs>
+      fields: Prisma.EmbedCacheFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.EmbedCacheFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.EmbedCacheFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>
+        }
+        findFirst: {
+          args: Prisma.EmbedCacheFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.EmbedCacheFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>
+        }
+        findMany: {
+          args: Prisma.EmbedCacheFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>[]
+        }
+        create: {
+          args: Prisma.EmbedCacheCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>
+        }
+        createMany: {
+          args: Prisma.EmbedCacheCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.EmbedCacheCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>[]
+        }
+        delete: {
+          args: Prisma.EmbedCacheDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>
+        }
+        update: {
+          args: Prisma.EmbedCacheUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>
+        }
+        deleteMany: {
+          args: Prisma.EmbedCacheDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.EmbedCacheUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.EmbedCacheUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>[]
+        }
+        upsert: {
+          args: Prisma.EmbedCacheUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$EmbedCachePayload>
+        }
+        aggregate: {
+          args: Prisma.EmbedCacheAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateEmbedCache>
+        }
+        groupBy: {
+          args: Prisma.EmbedCacheGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmbedCacheGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.EmbedCacheCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.EmbedCacheCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -786,6 +861,22 @@ export const SubscriberScalarFieldEnum = {
 export type SubscriberScalarFieldEnum = (typeof SubscriberScalarFieldEnum)[keyof typeof SubscriberScalarFieldEnum]
 
 
+export const EmbedCacheScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  type: 'type',
+  title: 'title',
+  description: 'description',
+  image: 'image',
+  provider: 'provider',
+  embedHtml: 'embedHtml',
+  ok: 'ok',
+  fetchedAt: 'fetchedAt'
+} as const
+
+export type EmbedCacheScalarFieldEnum = (typeof EmbedCacheScalarFieldEnum)[keyof typeof EmbedCacheScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -800,6 +891,14 @@ export const QueryMode = {
 } as const
 
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -969,6 +1068,7 @@ export type GlobalOmitConfig = {
   comment?: Prisma.CommentOmit
   admin?: Prisma.AdminOmit
   subscriber?: Prisma.SubscriberOmit
+  embedCache?: Prisma.EmbedCacheOmit
 }
 
 /* Types for Logging */

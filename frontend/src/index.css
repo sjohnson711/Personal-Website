@@ -252,6 +252,106 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────
+   RICH EMBEDS — preview cards + media players for bare URLs
+───────────────────────────────────────────────────────── */
+.prose-ink .embed-card {
+  display: flex;
+  gap: 1rem;
+  margin: 1.75rem 0;
+  border: 1px solid #eae4d8;
+  border-radius: 0.65rem;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(28, 25, 23, 0.06), 0 1px 3px rgba(28, 25, 23, 0.04);
+  overflow: hidden;
+  text-decoration: none;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+.prose-ink .embed-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(184, 150, 46, 0.35);
+  box-shadow: 0 8px 24px rgba(28, 25, 23, 0.1), 0 2px 6px rgba(28, 25, 23, 0.06);
+}
+.prose-ink .embed-card__thumb {
+  width: 200px;
+  flex-shrink: 0;
+  object-fit: cover;
+  align-self: stretch;
+  /* override the generic .prose-ink img treatment */
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.prose-ink .embed-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.25rem;
+  min-width: 0;
+}
+.prose-ink .embed-card__title {
+  font-family: "Playfair Display", Georgia, serif;
+  color: #0f1b35;
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.prose-ink .embed-card__desc {
+  color: #6b6560;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.prose-ink .embed-card__meta {
+  margin-top: 0.15rem;
+  color: #a8a29e;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.prose-ink .embed-media {
+  position: relative;
+  width: 100%;
+  margin: 1.75rem 0;
+  border-radius: 0.65rem;
+  overflow: hidden;
+  border: 1px solid #eae4d8;
+  background: #0f1b35;
+}
+.prose-ink .embed-media iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.prose-ink .embed-skeleton {
+  height: 116px;
+  margin: 1.75rem 0;
+  border-radius: 0.65rem;
+  border: 1px solid #eae4d8;
+  background: linear-gradient(100deg, #f7f4ef 30%, #efe9de 50%, #f7f4ef 70%);
+  background-size: 200% 100%;
+  animation: embed-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes embed-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.prose-ink .embed-fallback {
+  /* degrade to a native-looking prose link */
+  word-break: break-word;
+}
+
+/* ─────────────────────────────────────────────────────────
    FORM INPUTS
 ───────────────────────────────────────────────────────── */
 .field-input {
@@ -640,6 +740,12 @@ body::after {
   body::after {
     display: none;
   }
+  .embed-skeleton {
+    animation: none !important;
+  }
+  .embed-card {
+    transition: none !important;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -672,6 +778,13 @@ body::after {
   .prose-ink img {
     max-width: 100%;
     height: auto;
+  }
+  .prose-ink .embed-card {
+    flex-direction: column;
+  }
+  .prose-ink .embed-card__thumb {
+    width: 100%;
+    height: 180px;
   }
 
   .btn-primary,

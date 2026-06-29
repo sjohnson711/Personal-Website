@@ -59,3 +59,8 @@ export type Admin = Prisma.AdminModel
  * 
  */
 export type Subscriber = Prisma.SubscriberModel
+/**
+ * Model EmbedCache
+ * 
+ */
+export type EmbedCache = Prisma.EmbedCacheModel

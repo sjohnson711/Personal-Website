@@ -1,32 +1,18 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Marked } from "marked";
 import CommentSection from "../components/CommentSection";
 import ShareButton from "../components/ShareButton";
+import EmbedBlock from "../components/EmbedBlock";
 import { api } from "../lib/api";
+import { parseArticle, type ArticleSegment } from "../lib/parseArticle";
 import { useIsMobile } from "../lib/useMediaQuery";
 
 interface Article { id: number; title: string; excerpt: string; content: string; createdAt: string; published: boolean; }
 
-// Dedicated marked instance with safety/a11y overrides:
-//   - escapes raw HTML in article bodies (defense-in-depth XSS guard)
-//   - downgrades markdown headings by one level so the page <h1> (article title)
-//     stays the sole h1 and screen-reader heading hierarchy isn't broken.
-const articleMarked = new Marked({
-  renderer: {
-    html() { return ""; },
-    heading({ tokens, depth }) {
-      const text = this.parser.parseInline(tokens);
-      const level = Math.min(depth + 1, 6);
-      return `<h${level}>${text}</h${level}>`;
-    },
-  },
-});
-
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<Article | null>(null);
-  const [html, setHtml] = useState("");
+  const [segments, setSegments] = useState<ArticleSegment[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
@@ -35,14 +21,14 @@ export default function ArticlePage() {
     if (!slug) return;
     api
       .get(`/articles/${slug}`)
-      .then(async (d: Article) => {
+      .then((d: Article) => {
         if (!d.published) {
           setNotFound(true);
           setLoading(false);
           return;
         }
         setArticle(d);
-        setHtml(await articleMarked.parse(d.content));
+        setSegments(parseArticle(d.content));
         setLoading(false);
       })
       .catch(() => {
@@ -97,7 +83,15 @@ export default function ArticlePage() {
           <ShareButton title={article.title} excerpt={article.excerpt} />
         </header>
 
-        <div className="prose-ink" dangerouslySetInnerHTML={{ __html: html }} />
+        <div className="prose-ink">
+          {segments.map((seg, i) =>
+            seg.kind === "html" ? (
+              <div key={i} dangerouslySetInnerHTML={{ __html: seg.html }} />
+            ) : (
+              <EmbedBlock key={i} url={seg.url} />
+            ),
+          )}
+        </div>
       </article>
 
       <CommentSection articleId={article.id} />
