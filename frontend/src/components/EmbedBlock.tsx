@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
-import { buildMediaEmbed, type MediaEmbed } from "../lib/embedProviders";
+import { buildMediaEmbed, isImageUrl, type MediaEmbed } from "../lib/embedProviders";
 
 interface EmbedData {
   type: "card" | "video";
@@ -21,13 +21,15 @@ type Status = "loading" | "ready" | "error";
 export default function EmbedBlock({ url }: { url: string }) {
   const [status, setStatus] = useState<Status>("loading");
   const [data, setData] = useState<EmbedData | null>(null);
+  const [imgFailed, setImgFailed] = useState(false);
 
-  // Compute the media embed synchronously — it doesn't depend on the network.
+  // Compute synchronously — neither depends on the network.
   const media: MediaEmbed | null = buildMediaEmbed(url);
+  const isImage = isImageUrl(url);
 
   useEffect(() => {
-    // Allowlisted media players don't need backend metadata.
-    if (media) {
+    // Allowlisted media players and direct images don't need backend metadata.
+    if (media || isImage) {
       setStatus("ready");
       return;
     }
@@ -46,13 +48,34 @@ export default function EmbedBlock({ url }: { url: string }) {
     return () => {
       active = false;
     };
-  }, [url, media]);
+  }, [url, media, isImage]);
 
   let host = url;
   try {
     host = new URL(url).hostname.replace(/^www\./, "");
   } catch {
     /* keep raw url */
+  }
+
+  // Direct image — render inline. A load failure degrades to the plain link
+  // below so a reader never sees a broken-image box.
+  if (isImage && !imgFailed) {
+    return (
+      <img
+        className="embed-image"
+        src={url}
+        alt=""
+        loading="lazy"
+        onError={() => setImgFailed(true)}
+      />
+    );
+  }
+  if (isImage && imgFailed) {
+    return (
+      <a className="embed-fallback" href={url} target="_blank" rel="noopener noreferrer">
+        {url}
+      </a>
+    );
   }
 
   // Media player.

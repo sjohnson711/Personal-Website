@@ -17,6 +17,25 @@ export interface MediaEmbed {
 
 const YT_ALLOW = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen";
 
+const IMAGE_EXT = /\.(jpe?g|png|gif|webp|avif|svg)$/i;
+
+/**
+ * True when a bare URL points at an image file, so the renderer can drop it
+ * inline as an <img> (Medium-style) instead of fetching an OpenGraph card.
+ * Mirrors buildMediaEmbed's safety stance: only http(s), and the decision is
+ * based solely on the pathname extension (query string ignored).
+ */
+export function isImageUrl(rawUrl: string): boolean {
+  let u: URL;
+  try {
+    u = new URL(rawUrl);
+  } catch {
+    return false;
+  }
+  if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+  return IMAGE_EXT.test(u.pathname);
+}
+
 /**
  * Returns iframe config for an allowlisted media URL, or null if the URL is not
  * a recognized provider (caller falls back to a card / plain link).
