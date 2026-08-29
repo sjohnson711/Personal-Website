@@ -6,7 +6,7 @@ import AdminArticleRow from "@/components/AdminArticleRow";
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) redirect("/gateway");
+  if (!session?.user) redirect("/gateway/login_admin");
 
   const articles = await prisma.article.findMany({
     orderBy: { createdAt: "desc" },
