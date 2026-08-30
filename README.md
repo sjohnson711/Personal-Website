@@ -2,7 +2,7 @@
 
 > A production-ready blog platform showcasing modern full-stack development practices with React 19, Express, PostgreSQL, and multi-service deployments.
 
-**Live Demo:** [personal-website-kgm3-6in28es7v-seths-projects-4bb15efa.vercel.app](https://letterofforgiveness.com)
+**Live Demo:** [https://letterofforgiveness.com/](https://letterofforgiveness.com)
 
 ---
 
