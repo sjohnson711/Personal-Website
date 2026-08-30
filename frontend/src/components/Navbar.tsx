@@ -151,7 +151,7 @@ export default function Navbar() {
               )}
             </div>
 
-            {email ? (
+            {email && (
               <button
                 onClick={handleLogout}
                 style={{
@@ -169,23 +169,6 @@ export default function Navbar() {
               >
                 Sign Out
               </button>
-            ) : (
-              <Link
-                to="/gateway"
-                style={{
-                  padding: "0.42rem 1.1rem",
-                  borderRadius: "0.4rem",
-                  border: "1px solid rgba(184,150,46,0.4)",
-                  color: "#7A5C10",
-                  fontFamily: '"DM Sans", sans-serif',
-                  fontWeight: 600,
-                  fontSize: "0.83rem",
-                  textDecoration: "none",
-                  transition: "border-color 0.15s",
-                }}
-              >
-                Sign In
-              </Link>
             )}
           </>
         )}
@@ -285,14 +268,14 @@ export default function Navbar() {
               </Link>
             )}
 
-            <div
-              style={{
-                marginTop: "0.75rem",
-                paddingTop: "0.75rem",
-                borderTop: "1px solid #E5DDD4",
-              }}
-            >
-              {email ? (
+            {email && (
+              <div
+                style={{
+                  marginTop: "0.75rem",
+                  paddingTop: "0.75rem",
+                  borderTop: "1px solid #E5DDD4",
+                }}
+              >
                 <button
                   onClick={handleLogout}
                   style={{
@@ -311,29 +294,8 @@ export default function Navbar() {
                 >
                   Sign Out
                 </button>
-              ) : (
-                <Link
-                  to="/gateway"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    minHeight: "48px",
-                    padding: "0.6rem 1rem",
-                    borderRadius: "0.4rem",
-                    border: "1px solid rgba(184,150,46,0.4)",
-                    color: "#7A5C10",
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontWeight: 600,
-                    fontSize: "0.95rem",
-                    textDecoration: "none",
-                  }}
-                >
-                  Sign In
-                </Link>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}
