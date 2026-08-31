@@ -525,6 +525,133 @@ textarea.field-input {
 }
 
 /* ─────────────────────────────────────────────────────────
+   SHARE MENU
+───────────────────────────────────────────────────────── */
+.share-root {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Icon-only trigger — echoes .btn-outline's gold hairline */
+.share-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #7a5c10;
+  border: 1px solid rgba(184, 150, 46, 0.35);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    color 0.15s;
+}
+
+.share-trigger:hover,
+.share-trigger[aria-expanded="true"] {
+  border-color: #b8962e;
+  background: rgba(184, 150, 46, 0.09);
+  color: #5c4408;
+}
+
+.share-trigger:focus-visible {
+  outline: 2px solid #b8962e;
+  outline-offset: 2px;
+}
+
+.share-trigger svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Popover panel */
+.share-menu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  z-index: 1000;
+  width: 13rem;
+  max-width: calc(100vw - 2.5rem);
+  padding: 0.4rem;
+  background: #ffffff;
+  border: 1px solid #eae4d8;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 12px 32px rgba(15, 27, 53, 0.12),
+    0 2px 6px rgba(15, 27, 53, 0.06);
+  animation: sharePop 0.14s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: top right;
+}
+
+@keyframes sharePop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Menu row — buttons and links share one look */
+.share-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: #2d2926;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+
+.share-item:hover {
+  background: rgba(184, 150, 46, 0.1);
+}
+
+.share-item:focus-visible {
+  outline: 2px solid #b8962e;
+  outline-offset: -2px;
+}
+
+.share-item svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: #6b6560;
+}
+
+.share-item:hover svg {
+  color: #2d2926;
+}
+
+.share-item.is-copied,
+.share-item.is-copied svg {
+  color: #40916c;
+}
+
+.share-divider {
+  height: 1px;
+  margin: 0.3rem 0.15rem;
+  background: #eae4d8;
+}
+
+/* ─────────────────────────────────────────────────────────
    ALERTS
 ───────────────────────────────────────────────────────── */
 .alert-error {
@@ -755,6 +882,9 @@ body::after {
   .embed-card {
     transition: none !important;
   }
+  .share-menu {
+    animation: none !important;
+  }
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -804,6 +934,11 @@ body::after {
   .btn-outline {
     padding: 0.45rem 1rem;
     font-size: 0.78rem;
+  }
+
+  .share-trigger {
+    width: 2rem;
+    height: 2rem;
   }
 
   .field-input {

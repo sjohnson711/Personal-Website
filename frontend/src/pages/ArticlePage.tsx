@@ -65,22 +65,24 @@ export default function ArticlePage() {
         <header style={{ marginBottom: isMobile ? "1.5rem" : "2.25rem",
                          paddingBottom: isMobile ? "1.25rem" : "2rem",
                          borderBottom: "1px solid #EAE4D8" }}>
-          <time
-            dateTime={new Date(article.createdAt).toISOString()}
-            style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: "1rem" }}
-          >
-            {date}
-          </time>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
+            <time
+              dateTime={new Date(article.createdAt).toISOString()}
+              style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}
+            >
+              {date}
+            </time>
+            <ShareButton title={article.title} excerpt={article.excerpt} />
+          </div>
           <h1
             style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(1.5rem, 6vw, 2.4rem)", fontWeight: 900, color: "#0F1B35", lineHeight: 1.15, margin: "0 0 1.1rem", letterSpacing: "-0.02em" }}
           >
             {article.title}
           </h1>
           <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#6B6560", fontStyle: "italic", lineHeight: 1.7,
-                      fontSize: isMobile ? "0.92rem" : "1rem", margin: "0 0 1.5rem" }}>
+                      fontSize: isMobile ? "0.92rem" : "1rem", margin: 0 }}>
             {article.excerpt}
           </p>
-          <ShareButton title={article.title} excerpt={article.excerpt} />
         </header>
 
         <div className="prose-ink">

@@ -1,238 +1,179 @@
-import { useState } from "react";
-import { useIsMobile } from "../lib/useMediaQuery";
+import { useEffect, useRef, useState } from "react";
 
 interface ShareButtonProps {
   title: string;
   excerpt: string;
 }
 
+/* ── 16px inline icons, all currentColor ─────────────────── */
+
+const ShareIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7" />
+    <path d="M16 6l-4-4-4 4" />
+    <path d="M12 2v13" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const LinkedInIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 1 1 0-4.124 2.062 2.062 0 0 1 0 4.124zM7.119 20.452H3.554V9h3.565v11.452z" />
+  </svg>
+);
+
+const FacebookIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="M24 12.073C24 5.406 18.627 0 12 0S0 5.406 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.026 1.792-4.697 4.533-4.697 1.313 0 2.686.236 2.686.236v2.971H15.83c-1.491 0-1.956.931-1.956 1.886v2.264h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" />
+  </svg>
+);
+
+const LinkIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20 6L9 17l-5-5" />
+  </svg>
+);
+
 export default function ShareButton({ title, excerpt }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
   const [open, setOpen] = useState(false);
-  const isMobile = useIsMobile();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const url = window.location.href;
-  const encodedUrl = encodeURIComponent(url);
-  const encodedTitle = encodeURIComponent(title);
+  // Close on outside click / Escape while open
+  useEffect(() => {
+    if (!open) return;
 
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    const onMouseDown = (e: MouseEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+        setOpen(false);
+      }, 1200);
+    } catch (err) {
+      console.error("Copy failed:", err);
+    }
   };
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title,
-          text: excerpt,
-          url,
-        });
-      } catch (err) {
-        if ((err as Error).name !== "AbortError") {
-          console.error("Share failed:", err);
-        }
+    try {
+      await navigator.share({ title, text: excerpt, url: window.location.href });
+      setOpen(false);
+    } catch (err) {
+      if ((err as Error).name !== "AbortError") {
+        console.error("Share failed:", err);
       }
     }
   };
 
+  const encodedUrl = () => encodeURIComponent(window.location.href);
   const shareLinks = [
     {
-      name: "Twitter",
-      icon: "𝕏",
-      url: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
-      color: "#000000",
+      name: "X (Twitter)",
+      icon: <XIcon />,
+      url: `https://twitter.com/intent/tweet?url=${encodedUrl()}&text=${encodeURIComponent(title)}`,
     },
     {
       name: "LinkedIn",
-      icon: "in",
-      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
-      color: "#0A66C2",
+      icon: <LinkedInIcon />,
+      url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl()}`,
     },
     {
       name: "Facebook",
-      icon: "f",
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      color: "#1877F2",
+      icon: <FacebookIcon />,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl()}`,
     },
   ];
 
+  const canNativeShare = typeof navigator !== "undefined" && !!navigator.share;
+
   return (
-    <div style={{ position: "relative" }}>
+    <div className="share-root" ref={rootRef}>
       <button
-        onClick={() => setOpen(!open)}
-        style={{
-          padding: "0.65rem 1.3rem",
-          borderRadius: "0.5rem",
-          background: "rgba(184,150,46,0.12)",
-          border: "1px solid rgba(184,150,46,0.3)",
-          color: "#7A5C10",
-          fontFamily: '"DM Sans", sans-serif',
-          fontWeight: 600,
-          fontSize: "0.85rem",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.5rem",
-          transition: "all 200ms ease",
-        }}
-        onMouseEnter={(e) => {
-          (e.target as HTMLElement).style.background = "rgba(184,150,46,0.2)";
-          (e.target as HTMLElement).style.borderColor = "rgba(184,150,46,0.5)";
-        }}
-        onMouseLeave={(e) => {
-          (e.target as HTMLElement).style.background = "rgba(184,150,46,0.12)";
-          (e.target as HTMLElement).style.borderColor = "rgba(184,150,46,0.3)";
-        }}
+        ref={triggerRef}
+        type="button"
+        className="share-trigger"
+        aria-label="Share this article"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
       >
-        <span>Share</span>
-        <span style={{ opacity: 0.6 }}>↗</span>
+        <ShareIcon />
       </button>
 
       {open && (
-        <div
-          style={{
-            position: "absolute",
-            top: "calc(100% + 0.75rem)",
-            right: isMobile ? "auto" : 0,
-            left: isMobile ? 0 : "auto",
-            background: "rgba(15,27,53,0.98)",
-            border: "1px solid rgba(184,150,46,0.2)",
-            borderRadius: "0.75rem",
-            padding: "0.75rem",
-            minWidth: isMobile ? "180px" : "200px",
-            maxWidth: isMobile ? "calc(100vw - 2.5rem)" : "none",
-            zIndex: 1000,
-            backdropFilter: "blur(4px)",
-            boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "0.5rem",
-            }}
-          >
-            {/* @ts-expect-error - navigator.share is available in some browsers */}
-            {navigator?.share && (
-              <>
-                <button
-                  onClick={handleNativeShare}
-                  style={{
-                    padding: "0.65rem 1rem",
-                    background: "transparent",
-                    border: "none",
-                    color: "#FFF7ED",
-                    fontFamily: '"DM Sans", sans-serif',
-                    fontSize: "0.85rem",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    borderRadius: "0.4rem",
-                    transition: "background 150ms ease",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.target as HTMLElement).style.background = "rgba(184,150,46,0.15)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.target as HTMLElement).style.background = "transparent";
-                  }}
-                >
-                  Share via…
-                </button>
-                <div
-                  style={{
-                    height: "1px",
-                    background: "rgba(184,150,46,0.15)",
-                    margin: "0.25rem 0",
-                  }}
-                />
-              </>
-            )}
+        <div className="share-menu" role="menu" aria-label="Share options">
+          {canNativeShare && (
+            <>
+              <button type="button" role="menuitem" className="share-item" onClick={handleNativeShare}>
+                <ShareIcon />
+                Share via…
+              </button>
+              <div className="share-divider" role="separator" />
+            </>
+          )}
 
-            {shareLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  padding: "0.65rem 1rem",
-                  background: "transparent",
-                  color: "#FFF7ED",
-                  fontFamily: '"DM Sans", sans-serif',
-                  fontSize: "0.85rem",
-                  textDecoration: "none",
-                  borderRadius: "0.4rem",
-                  transition: "background 150ms ease",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                }}
-                onMouseEnter={(e) => {
-                  (e.target as HTMLElement).style.background = "rgba(184,150,46,0.15)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLElement).style.background = "transparent";
-                }}
-              >
-                <span style={{ fontWeight: 700, fontSize: "0.9rem" }}>
-                  {link.name === "Twitter" ? "𝕏" : link.name === "LinkedIn" ? "in" : "f"}
-                </span>
-                {link.name}
-              </a>
-            ))}
-
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(184,150,46,0.15)",
-                margin: "0.25rem 0",
-              }}
-            />
-
-            <button
-              onClick={handleCopyLink}
-              style={{
-                padding: "0.65rem 1rem",
-                background: "transparent",
-                border: "none",
-                color: copied ? "#40916C" : "#FFF7ED",
-                fontFamily: '"DM Sans", sans-serif',
-                fontSize: "0.85rem",
-                cursor: "pointer",
-                textAlign: "left",
-                borderRadius: "0.4rem",
-                transition: "all 150ms ease",
-              }}
-              onMouseEnter={(e) => {
-                if (!copied) {
-                  (e.target as HTMLElement).style.background = "rgba(184,150,46,0.15)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.background = "transparent";
-              }}
+          {shareLinks.map((link) => (
+            <a
+              key={link.name}
+              role="menuitem"
+              className="share-item"
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setOpen(false)}
             >
-              {copied ? "✓ Copied!" : "Copy link"}
-            </button>
-          </div>
-        </div>
-      )}
+              {link.icon}
+              {link.name}
+            </a>
+          ))}
 
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: 999,
-          }}
-        />
+          <div className="share-divider" role="separator" />
+
+          <button
+            type="button"
+            role="menuitem"
+            className={`share-item${copied ? " is-copied" : ""}`}
+            onClick={handleCopyLink}
+          >
+            {copied ? <CheckIcon /> : <LinkIcon />}
+            {copied ? "Copied!" : "Copy link"}
+          </button>
+        </div>
       )}
     </div>
   );
