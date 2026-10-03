@@ -75,7 +75,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
       <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", paddingBottom: "1.5rem", borderBottom: "1px solid #EAE4D8", marginBottom: "1.75rem" }}>
         <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                      fontSize: isMobile ? "1.05rem" : "1.2rem",
-                     fontWeight: 700, color: "#0F1B35", margin: 0 }}>
+                     fontWeight: 700, color: "var(--color-navy)", margin: 0 }}>
           Reader Messages
         </h2>
         {comments.length > 0 && (
@@ -97,9 +97,9 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
               }}
             >
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: "1rem", marginBottom: "0.55rem", flexWrap: "wrap" }}>
-                <span style={{ fontFamily: '"DM Sans", sans-serif', color: "#0F1B35", fontWeight: 700, fontSize: "0.88rem" }}>{c.name}</span>
+                <span style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-navy)", fontWeight: 700, fontSize: "0.88rem" }}>{c.name}</span>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <time style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.72rem" }}>{formatDate(c.createdAt)}</time>
+                  <time style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.72rem" }}>{formatDate(c.createdAt)}</time>
                   {isAdmin && (
                     <button
                       type="button"
@@ -121,14 +121,14 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
           ))}
         </div>
       ) : (
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.9rem", marginBottom: "2rem" }}>
+        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.9rem", marginBottom: "2rem" }}>
           No messages yet — be the first to share your thoughts.
         </p>
       )}
 
       {/* Form */}
       <div style={{ borderTop: "1px solid #EAE4D8", paddingTop: "2rem" }}>
-        <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: "1rem", color: "#0F1B35", margin: "0 0 1.5rem" }}>
+        <h3 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: "1rem", color: "var(--color-navy)", margin: "0 0 1.5rem" }}>
           Leave a Message
         </h3>
 
@@ -181,7 +181,7 @@ export default function CommentSection({ articleId }: CommentSectionProps) {
             <p
               id="comment-body-count"
               aria-live="polite"
-              style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.7rem", marginTop: "0.3rem", textAlign: "right" }}
+              style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem", marginTop: "0.3rem", textAlign: "right" }}
             >
               <span className="sr-only">Characters used: </span>{body.length}/2000
             </p>

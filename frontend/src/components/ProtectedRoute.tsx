@@ -11,7 +11,7 @@ export default function ProtectedRoute() {
           display: "flex",
           justifyContent: "center",
           padding: "4rem",
-          color: "#a89070",
+          color: "var(--color-slate)",
         }}
       >
         Loading…

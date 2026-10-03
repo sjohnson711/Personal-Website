@@ -15,13 +15,25 @@ export default function ArticlePage() {
   const [segments, setSegments] = useState<ArticleSegment[]>([]);
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (!slug) return;
+    let active = true;
+    setLoading(true);
+    setNotFound(false);
+    setError(false);
+    setArticle(null);
+    if (!slug) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
     api
       .get(`/articles/${slug}`)
       .then((d: Article) => {
+        if (!active) return;
         if (!d.published) {
           setNotFound(true);
           setLoading(false);
@@ -31,21 +43,39 @@ export default function ArticlePage() {
         setSegments(parseArticle(d.content));
         setLoading(false);
       })
-      .catch(() => {
-        setNotFound(true);
+      .catch((err: unknown) => {
+        if (!active) return;
+        if (err instanceof Error && "status" in err && err.status === 404) {
+          setNotFound(true);
+        } else {
+          setError(true);
+        }
         setLoading(false);
       });
-  }, [slug]);
+    return () => { active = false; };
+  }, [slug, attempt]);
 
-  if (loading) return <div style={{ padding: "6rem", textAlign: "center", color: "#A8A29E", fontFamily: '"DM Sans", sans-serif' }}>Loading…</div>;
+  if (loading) return <div role="status" style={{ padding: "6rem", textAlign: "center", color: "var(--color-slate)", fontFamily: '"DM Sans", sans-serif' }}>Loading…</div>;
+
+  if (error) return (
+    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "3rem 1rem" }}>
+      <Link to="/articles" style={{ color: "var(--color-gold-ink)" }}>← Back to Articles</Link>
+      <div className="card no-lift" style={{ padding: "2rem", textAlign: "center", marginTop: "2rem" }}>
+        <p role="alert" className="alert-error">We couldn't load this article. Please try again.</p>
+        <button type="button" className="btn-primary" onClick={() => setAttempt((value) => value + 1)} style={{ marginTop: "1rem" }}>
+          Try again
+        </button>
+      </div>
+    </div>
+  );
 
   if (notFound || !article) return (
     <div style={{ maxWidth: "700px", margin: "0 auto",
                   padding: isMobile ? "3rem 1rem" : "5rem 1.5rem" }}>
-      <Link to="/articles" style={{ fontFamily: '"DM Sans", sans-serif', color: "#7A5C10", textDecoration: "none", fontSize: "0.85rem", fontWeight: 600 }}>← Back to Articles</Link>
+      <Link to="/articles" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", textDecoration: "none", fontSize: "0.85rem", fontWeight: 600 }}>← Back to Articles</Link>
       <div className="card no-lift" style={{ padding: isMobile ? "2rem 1.25rem" : "4rem", textAlign: "center", marginTop: "2rem" }}>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.65rem", color: "#0F1B35" }}>Article Not Found</h1>
-        <p style={{ color: "#A8A29E", marginTop: "0.75rem" }}>This article doesn't exist or has been removed.</p>
+        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.65rem", color: "var(--color-navy)" }}>Article Not Found</h1>
+        <p style={{ color: "var(--color-slate)", marginTop: "0.75rem" }}>This article doesn't exist or has been removed.</p>
       </div>
     </div>
   );
@@ -57,7 +87,7 @@ export default function ArticlePage() {
                                        padding: isMobile ? "2.5rem 1rem 4rem" : "4rem 1.5rem 7rem",
                                        display: "flex", flexDirection: "column",
                                        gap: isMobile ? "1.25rem" : "2rem" }}>
-      <Link to="/articles" style={{ fontFamily: '"DM Sans", sans-serif', color: "#7A5C10", textDecoration: "none", fontSize: "0.83rem", fontWeight: 600, letterSpacing: "0.02em" }}>
+      <Link to="/articles" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", textDecoration: "none", fontSize: "0.83rem", fontWeight: 600, letterSpacing: "0.02em" }}>
         ← All Articles
       </Link>
 
@@ -68,18 +98,18 @@ export default function ArticlePage() {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginBottom: "1rem" }}>
             <time
               dateTime={new Date(article.createdAt).toISOString()}
-              style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}
+              style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}
             >
               {date}
             </time>
             <ShareButton title={article.title} excerpt={article.excerpt} />
           </div>
           <h1
-            style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(1.5rem, 6vw, 2.4rem)", fontWeight: 900, color: "#0F1B35", lineHeight: 1.15, margin: "0 0 1.1rem", letterSpacing: "-0.02em" }}
+            style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(1.5rem, 6vw, 2.4rem)", fontWeight: 900, color: "var(--color-navy)", lineHeight: 1.15, margin: "0 0 1.1rem", letterSpacing: "-0.02em" }}
           >
             {article.title}
           </h1>
-          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#6B6560", fontStyle: "italic", lineHeight: 1.7,
+          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontStyle: "italic", lineHeight: 1.7,
                       fontSize: isMobile ? "0.92rem" : "1rem", margin: 0 }}>
             {article.excerpt}
           </p>

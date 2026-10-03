@@ -16,10 +16,10 @@ export default function NotFoundPage() {
         </p>
         <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                      fontSize: isMobile ? "1.25rem" : "1.5rem",
-                     fontWeight: 700, color: "#0F1B35", margin: "0 0 0.65rem" }}>
+                     fontWeight: 700, color: "var(--color-navy)", margin: "0 0 0.65rem" }}>
           Page Not Found
         </h1>
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#A8A29E", lineHeight: 1.65, margin: "0 0 2.25rem", fontSize: "0.95rem" }}>
+        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", lineHeight: 1.65, margin: "0 0 2.25rem", fontSize: "0.95rem" }}>
           This page doesn't exist or may have been moved.
         </p>
         <Link to="/" className="btn-primary" style={{ justifyContent: "center", width: "100%" }}>

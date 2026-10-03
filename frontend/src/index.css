@@ -6,7 +6,7 @@
    Palette: Warm Cream · Deep Navy · Aged Gold · Charcoal
    Typography: Playfair Display (headings) + DM Sans (body)
 ───────────────────────────────────────────────────────── */
-@theme {
+@theme static {
   --color-cream: #f7f4ef;
   --color-parchment: #efe9de;
   --color-white: #ffffff;
@@ -14,6 +14,7 @@
   --color-navy-mid: #1e2e52;
   --color-navy-light: #2e4170;
   --color-gold: #b8962e;
+  --color-gold-ink: #7a5c10;
   --color-gold-light: #d4af50;
   --color-gold-pale: #f0e4b8;
   --color-charcoal: #1c1917;
@@ -21,9 +22,12 @@
   --color-slate: #6b6560;
   --color-stone: #a8a29e;
   --color-rule: #e5ddd4;
+  --color-success: #256342;
+  --color-success-light: #75c69a;
+  --color-on-dark-muted: #b9b3ac;
 
   --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
-  --font-sans: "DM Sans", "Inter", system-ui, sans-serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
   --font-mono: "DM Mono", ui-monospace, monospace;
 }
 
@@ -62,7 +66,7 @@ body {
 }
 
 body {
-  font-family: "DM Sans", "Inter", system-ui, sans-serif;
+  font-family: "DM Sans", system-ui, sans-serif;
   background: #f7f4ef;
   color: #1c1917;
   -webkit-font-smoothing: antialiased;
@@ -127,13 +131,13 @@ body {
 
 .badge-published {
   background: rgba(184, 150, 46, 0.1);
-  color: #9a7820;
+  color: var(--color-gold-ink);
   border: 1px solid rgba(184, 150, 46, 0.3);
 }
 
 .badge-draft {
   background: rgba(107, 101, 96, 0.08);
-  color: #9a9490;
+  color: var(--color-slate);
   border: 1px solid rgba(107, 101, 96, 0.2);
 }
 
@@ -169,7 +173,7 @@ body {
 }
 .prose-ink h3 {
   font-size: 1.2rem;
-  color: #b8962e;
+  color: var(--color-gold-ink);
 }
 
 .prose-ink p {
@@ -177,20 +181,20 @@ body {
 }
 
 .prose-ink a {
-  color: #b8962e;
+  color: var(--color-gold-ink);
   text-decoration: underline;
   text-decoration-color: rgba(184, 150, 46, 0.4);
   text-underline-offset: 3px;
 }
 .prose-ink a:hover {
-  text-decoration-color: #b8962e;
+  text-decoration-color: var(--color-gold-ink);
 }
 
 .prose-ink blockquote {
   border-left: 3px solid #b8962e;
   padding: 0.75rem 1.5rem;
   margin: 1.75rem 0;
-  color: #6b6560;
+  color: var(--color-slate);
   font-style: italic;
   background: rgba(184, 150, 46, 0.04);
   border-radius: 0 0.5rem 0.5rem 0;
@@ -204,7 +208,7 @@ body {
   border-radius: 0.3rem;
   font-family: "DM Mono", monospace;
   font-size: 0.86em;
-  color: #7a5c10;
+  color: var(--color-gold-ink);
 }
 
 .prose-ink pre {
@@ -309,7 +313,7 @@ body {
   overflow: hidden;
 }
 .prose-ink .embed-card__desc {
-  color: #6b6560;
+  color: var(--color-slate);
   font-size: 0.9rem;
   line-height: 1.5;
   display: -webkit-box;
@@ -319,7 +323,7 @@ body {
 }
 .prose-ink .embed-card__meta {
   margin-top: 0.15rem;
-  color: #a8a29e;
+  color: var(--color-slate);
   font-family: "DM Sans", sans-serif;
   font-size: 0.7rem;
   font-weight: 700;
@@ -379,12 +383,12 @@ body {
 }
 
 .field-input:focus {
-  border-color: #b8962e;
+  border-color: var(--color-gold-ink);
   box-shadow: 0 0 0 3px rgba(184, 150, 46, 0.12);
 }
 
 .field-input::placeholder {
-  color: #b0a89e;
+  color: var(--color-slate);
 }
 
 textarea.field-input {
@@ -393,7 +397,7 @@ textarea.field-input {
 
 .field-label {
   display: block;
-  color: #6b6560;
+  color: var(--color-slate);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.09em;
@@ -450,7 +454,7 @@ textarea.field-input {
   padding: 0.72rem 1.5rem;
   border-radius: 0.5rem;
   background: transparent;
-  color: #6b6560;
+  color: var(--color-slate);
   font-family: "DM Sans", sans-serif;
   font-weight: 600;
   font-size: 0.92rem;
@@ -464,7 +468,7 @@ textarea.field-input {
 }
 
 .btn-ghost:hover {
-  border-color: #b0a89e;
+  border-color: var(--color-slate);
   color: #1c1917;
   background: rgba(28, 25, 23, 0.04);
 }
@@ -477,7 +481,7 @@ textarea.field-input {
   padding: 0.5rem 1.25rem;
   border-radius: 0.45rem;
   background: transparent;
-  color: #7a5c10;
+  color: var(--color-gold-ink);
   font-family: "DM Sans", sans-serif;
   font-weight: 600;
   font-size: 0.83rem;
@@ -491,7 +495,7 @@ textarea.field-input {
 }
 
 .btn-outline:hover {
-  border-color: #b8962e;
+  border-color: var(--color-gold-ink);
   background: rgba(184, 150, 46, 0.07);
   color: #5c4408;
 }
@@ -537,12 +541,12 @@ textarea.field-input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   border-radius: 0.5rem;
   background: transparent;
-  color: #7a5c10;
+  color: var(--color-gold-ink);
   border: 1px solid rgba(184, 150, 46, 0.35);
   cursor: pointer;
   transition:
@@ -553,7 +557,7 @@ textarea.field-input {
 
 .share-trigger:hover,
 .share-trigger[aria-expanded="true"] {
-  border-color: #b8962e;
+  border-color: var(--color-gold-ink);
   background: rgba(184, 150, 46, 0.09);
   color: #5c4408;
 }
@@ -633,7 +637,7 @@ textarea.field-input {
   width: 1rem;
   height: 1rem;
   flex-shrink: 0;
-  color: #6b6560;
+  color: var(--color-slate);
 }
 
 .share-item:hover svg {
@@ -642,7 +646,7 @@ textarea.field-input {
 
 .share-item.is-copied,
 .share-item.is-copied svg {
-  color: #40916c;
+  color: var(--color-success);
 }
 
 .share-divider {
@@ -709,7 +713,7 @@ textarea.field-input {
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #a8a29e;
+  color: var(--color-slate);
   margin-top: 0.45rem;
   font-family: "DM Sans", sans-serif;
 }
@@ -739,19 +743,13 @@ textarea.field-input {
   }
 }
 
-.fade-up {
+.fade-up,
+.hero-section {
   animation: fadeUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Stagger children */
-.fade-up > *:nth-child(1) {
-  animation-delay: 0.04s;
-}
-.fade-up > *:nth-child(2) {
-  animation-delay: 0.09s;
-}
-.fade-up > *:nth-child(3) {
-  animation-delay: 0.14s;
+.hero-section {
+  animation-duration: 0.6s;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -853,6 +851,10 @@ body::after {
 }
 
 .reveal {
+  opacity: 1;
+}
+
+.reveal.reveal-pending {
   opacity: 0;
 }
 
@@ -864,6 +866,22 @@ body::after {
    REDUCED MOTION  (accessibility)
 ───────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+  .fade-up,
+  .hero-section {
+    animation: none !important;
+  }
+  .card,
+  .btn-primary,
+  .btn-ghost,
+  .btn-outline,
+  .btn-danger,
+  .mobile-nav-panel {
+    transition: none !important;
+  }
+  .card:hover,
+  .btn-primary:hover {
+    transform: none;
+  }
   .hero-orb {
     animation: none !important;
   }
@@ -936,11 +954,6 @@ body::after {
     font-size: 0.78rem;
   }
 
-  .share-trigger {
-    width: 2rem;
-    height: 2rem;
-  }
-
   .field-input {
     padding: 0.65rem 0.85rem;
     font-size: 16px; /* prevents iOS auto-zoom on focus */
@@ -962,9 +975,23 @@ body::after {
     display: none; /* huge fixed-px orbs overflow + waste CPU on mobile */
   }
 
-  .glass-card,
   .card {
     border-radius: 0.625rem;
   }
+}
+
+/* Use a consistent, visible keyboard focus indicator on both surfaces. */
+:is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-color, var(--color-navy));
+  outline-offset: 3px;
+}
+
+.newsletter-form {
+  --focus-color: var(--color-gold-light);
+}
+
+.newsletter-form input::placeholder {
+  color: var(--color-on-dark-muted);
+  opacity: 1;
 }
 

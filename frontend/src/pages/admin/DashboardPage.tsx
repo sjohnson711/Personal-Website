@@ -47,13 +47,13 @@ export default function DashboardPage() {
                     gap: isMobile ? "1.25rem" : "1.25rem",
                     marginBottom: isMobile ? "1.75rem" : "3rem" }}>
         <div>
-          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "0.4rem" }}>Admin</p>
+          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "0.4rem" }}>Admin</p>
           <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                        fontSize: "clamp(1.55rem, 6vw, 2.2rem)",
-                       fontWeight: 900, color: "#0F1B35", margin: 0, letterSpacing: "-0.02em" }}>Dashboard</h1>
-          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#A8A29E", fontSize: "0.82rem", margin: "0.4rem 0 0",
+                       fontWeight: 900, color: "var(--color-navy)", margin: 0, letterSpacing: "-0.02em" }}>Dashboard</h1>
+          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.82rem", margin: "0.4rem 0 0",
                       wordBreak: "break-word" }}>
-            Signed in as <span style={{ color: "#7A5C10", fontWeight: 600 }}>{email}</span>
+            Signed in as <span style={{ color: "var(--color-gold-ink)", fontWeight: 600 }}>{email}</span>
           </p>
         </div>
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
@@ -84,15 +84,15 @@ export default function DashboardPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
                       padding: isMobile ? "0.9rem 1.25rem" : "1.1rem 1.75rem",
                       borderBottom: "1px solid #F0EBE2", background: "#FAFAF9" }}>
-          <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1rem", fontWeight: 700, color: "#0F1B35", margin: 0 }}>All Articles</h2>
-          <span style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.75rem" }}>{total} total</span>
+          <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1rem", fontWeight: 700, color: "var(--color-navy)", margin: 0 }}>All Articles</h2>
+          <span style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.75rem" }}>{total} total</span>
         </div>
 
         {loading ? (
-          <div style={{ padding: isMobile ? "2rem" : "3.5rem", textAlign: "center", color: "#C4BAB0", fontFamily: '"DM Sans", sans-serif' }}>Loading…</div>
+          <div style={{ padding: isMobile ? "2rem" : "3.5rem", textAlign: "center", color: "var(--color-slate)", fontFamily: '"DM Sans", sans-serif' }}>Loading…</div>
         ) : articles.length === 0 ? (
           <div style={{ padding: isMobile ? "2rem 1.25rem" : "3.5rem", textAlign: "center" }}>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", marginBottom: "1rem" }}>No articles yet.</p>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", marginBottom: "1rem" }}>No articles yet.</p>
             <Link to="/admin/articles/new" className="btn-primary" style={{ display: "inline-flex" }}>Write your first article</Link>
           </div>
         ) : (

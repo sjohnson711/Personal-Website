@@ -1,7 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ArticleCard from "../components/ArticleCard";
 import HeroImageCarousel from "../components/HeroImageCarousel";
+import ScrollReveal from "../components/ScrollReveal";
 import { api } from "../lib/api";
 import { useIsMobile } from "../lib/useMediaQuery";
 
@@ -51,15 +52,15 @@ function NewsletterSection() {
                     gap: isMobile ? "1.5rem" : "3rem",
                     alignItems: "center", boxShadow: "0 8px 40px rgba(15,27,53,0.18)" }}>
         <div>
-          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#B8962E", fontSize: "0.7rem",
+          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "var(--color-gold)", fontSize: "0.7rem",
                       fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase",
                       marginBottom: "0.6rem" }}>Newsletter</p>
-          <h2 style={{ fontFamily: '"Playfair Display",Georgia,serif',
+          <h2 id="newsletter-heading" style={{ fontFamily: '"Playfair Display",Georgia,serif',
                        fontSize: isMobile ? "1.35rem" : "1.65rem",
                        fontWeight: 700, color: "#F7F4EF", margin: "0 0 0.6rem", lineHeight: 1.2 }}>
             Stay in the Loop
           </h2>
-          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "#9A9490",
+          <p style={{ fontFamily: '"DM Sans",sans-serif', color: "var(--color-on-dark-muted)",
                       fontSize: isMobile ? "0.9rem" : "0.95rem",
                       lineHeight: 1.65, margin: 0 }}>
             Weekly articles on faith, tech, mental health, and community — delivered to your inbox.
@@ -68,7 +69,7 @@ function NewsletterSection() {
         </div>
 
         <div style={{ flexShrink: 0, width: isMobile ? "100%" : "auto" }}>
-          <form onSubmit={handleSubmit} aria-labelledby="newsletter-heading"
+          <form className="newsletter-form" onSubmit={handleSubmit} aria-labelledby="newsletter-heading"
                 style={{ display: "flex",
                          flexDirection: isMobile ? "column" : "row",
                          gap: "0.75rem" }}>
@@ -77,6 +78,7 @@ function NewsletterSection() {
             <label htmlFor="newsletter-email" className="sr-only">Email address</label>
             <input
               id="newsletter-email"
+              autoComplete="email"
               type="email"
               required
               aria-required="true"
@@ -90,7 +92,6 @@ function NewsletterSection() {
                        background: "rgba(255,255,255,0.07)", color: "#F7F4EF",
                        fontSize: isMobile ? "16px" : "0.93rem",
                        fontFamily: '"DM Sans",sans-serif',
-                       outline: "none",
                        minWidth: isMobile ? 0 : "220px",
                        width: isMobile ? "100%" : "auto" }}
             />
@@ -99,7 +100,7 @@ function NewsletterSection() {
               disabled={status === "loading" || status === "success"}
               style={{ padding: "0.72rem 1.6rem", borderRadius: "0.5rem",
                        background: status === "success" ? "#40916C" : "#B8962E",
-                       color: "#0F1B35", fontFamily: '"DM Sans",sans-serif',
+                       color: "var(--color-navy)", fontFamily: '"DM Sans",sans-serif',
                        fontWeight: 700, fontSize: "0.92rem", border: "none",
                        cursor: status === "loading" || status === "success" ? "default" : "pointer",
                        whiteSpace: "nowrap" }}>
@@ -114,7 +115,7 @@ function NewsletterSection() {
             aria-live="polite"
             style={{ marginTop: msg ? "0.6rem" : 0, minHeight: msg ? "1rem" : 0,
                      fontSize: "0.82rem",
-                     color: status === "success" ? "#40916C" : "#E57373",
+                     color: status === "success" ? "var(--color-success-light)" : "#E57373",
                      fontFamily: '"DM Sans",sans-serif' }}
           >
             {msg}
@@ -125,47 +126,38 @@ function NewsletterSection() {
   );
 }
 
-function useScrollReveal(count: number) {
-  const refs = useRef<(HTMLDivElement | null)[]>([]);
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            (e.target as HTMLElement).classList.add("visible");
-            obs.unobserve(e.target);
-          }
-        }),
-      { threshold: 0.1, rootMargin: "0px 0px -40px 0px" },
-    );
-    refs.current.forEach((el) => {
-      if (el) obs.observe(el);
-    });
-    return () => obs.disconnect();
-  }, [count]);
-  return refs;
-}
-
 export default function HomePage() {
   const [latest, setLatest] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const isMobile = useIsMobile();
 
   useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError(false);
     api
       .get("/articles?page=1")
-      .then((d: { articles?: Article[] }) =>
-        setLatest((d.articles ?? []).slice(0, 3)),
-      )
-      .catch(() => {});
-  }, []);
-
-  const cardRefs = useScrollReveal(latest.length);
+      .then((d: { articles?: Article[] }) => {
+        if (!active) return;
+        setLatest((d.articles ?? []).slice(0, 3));
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setError(true);
+        setLoading(false);
+      });
+    return () => { active = false; };
+  }, [attempt]);
 
   return (
     <div style={{ maxWidth: "1100px", margin: "0 auto",
                   padding: isMobile ? "0 1rem" : "0 1.5rem" }}>
       {/* ── Hero ─────────────────────────────────────────── */}
       <section
+        className="hero-section"
         style={{
           position: "relative",
           overflow: "hidden",
@@ -174,7 +166,6 @@ export default function HomePage() {
           gap: isMobile ? "2rem" : "4rem",
           alignItems: "center",
           padding: isMobile ? "3rem 0 2.5rem" : "7rem 0 6rem",
-          animation: "fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both",
         }}
       >
         {/* Ambient orbs */}
@@ -223,7 +214,7 @@ export default function HomePage() {
             <span
               style={{
                 fontFamily: '"Playfair Display", Georgia, serif',
-                color: "#B8962E",
+                color: "var(--color-gold)",
                 fontSize: isMobile ? "1.1rem" : "1.65rem",
                 fontWeight: 900,
                 lineHeight: 1,
@@ -271,7 +262,7 @@ export default function HomePage() {
                     borderRadius: "2rem",
                     background: "rgba(184,150,46,0.1)",
                     border: "1px solid rgba(184,150,46,0.3)",
-                    color: "#7A5C10",
+                    color: "var(--color-gold-ink)",
                     fontSize: "0.7rem",
                     fontWeight: 700,
                     letterSpacing: "0.14em",
@@ -297,7 +288,7 @@ export default function HomePage() {
                     fontFamily: '"Playfair Display", Georgia, serif',
                     fontSize: "clamp(1.9rem, 3.5vw, 2.9rem)",
                     fontWeight: 900,
-                    color: "#0F1B35",
+                    color: "var(--color-navy)",
                     lineHeight: 1.15,
                     letterSpacing: "-0.02em",
                     margin: 0,
@@ -310,7 +301,7 @@ export default function HomePage() {
               <p
                 style={{
                   fontFamily: '"DM Sans", sans-serif',
-                  color: "#6B6560",
+                  color: "var(--color-slate)",
                   fontSize: isMobile ? "0.95rem" : "1.05rem",
                   lineHeight: 1.85,
                   maxWidth: "500px",
@@ -332,8 +323,11 @@ export default function HomePage() {
                 }}
               >
                 <img
-                  src="/profile library pic.png"
+                  src="/profile-avatar.webp"
                   alt="Seth Johnson"
+                  width={60}
+                  height={60}
+                  decoding="async"
                   style={{
                     width: "60px",
                     height: "60px",
@@ -348,7 +342,7 @@ export default function HomePage() {
                     style={{
                       fontFamily: '"DM Sans", sans-serif',
                       fontWeight: 700,
-                      color: "#0F1B35",
+                      color: "var(--color-navy)",
                       fontSize: "0.9rem",
                       margin: "0 0 0.25rem",
                     }}
@@ -358,7 +352,7 @@ export default function HomePage() {
                   <p
                     style={{
                       fontFamily: '"DM Sans", sans-serif',
-                      color: "#6B6560",
+                      color: "var(--color-slate)",
                       fontSize: "0.8rem",
                       margin: 0,
                     }}
@@ -396,7 +390,7 @@ export default function HomePage() {
                   borderRadius: "2rem",
                   background: "rgba(184,150,46,0.1)",
                   border: "1px solid rgba(184,150,46,0.3)",
-                  color: "#7A5C10",
+                  color: "var(--color-gold-ink)",
                   fontSize: "0.7rem",
                   fontWeight: 700,
                   letterSpacing: "0.14em",
@@ -421,7 +415,7 @@ export default function HomePage() {
                   fontFamily: '"Playfair Display", Georgia, serif',
                   fontSize: "clamp(1.9rem, 3.5vw, 2.9rem)",
                   fontWeight: 900,
-                  color: "#0F1B35",
+                  color: "var(--color-navy)",
                   lineHeight: 1.15,
                   letterSpacing: "-0.02em",
                   margin: 0,
@@ -448,7 +442,7 @@ export default function HomePage() {
       <hr className="divider" />
 
       {/* ── Latest Posts ─────────────────────────────────── */}
-      {latest.length > 0 && (
+      {(loading || error || latest.length > 0) && (
         <section style={{ padding: isMobile ? "3rem 0" : "6rem 0" }}>
           <div
             style={{
@@ -463,7 +457,7 @@ export default function HomePage() {
               <p
                 style={{
                   fontFamily: '"DM Sans", sans-serif',
-                  color: "#B8962E",
+                  color: "var(--color-gold-ink)",
                   fontSize: "0.7rem",
                   fontWeight: 700,
                   letterSpacing: "0.16em",
@@ -479,7 +473,7 @@ export default function HomePage() {
               to="/articles"
               style={{
                 fontFamily: '"DM Sans", sans-serif',
-                color: "#B8962E",
+                color: "var(--color-gold-ink)",
                 fontSize: "0.86rem",
                 fontWeight: 600,
                 textDecoration: "none",
@@ -493,7 +487,16 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div
+          {loading ? (
+            <p role="status" style={{ color: "var(--color-slate)" }}>Loading latest articles…</p>
+          ) : error ? (
+            <div>
+              <p role="alert" className="alert-error">We couldn't load the latest articles. Please try again.</p>
+              <button type="button" className="btn-primary" onClick={() => setAttempt((value) => value + 1)} style={{ marginTop: "1rem" }}>
+                Try again
+              </button>
+            </div>
+          ) : <div
             style={{
               display: "grid",
               gridTemplateColumns: isMobile
@@ -503,18 +506,11 @@ export default function HomePage() {
             }}
           >
             {latest.map((a, i) => (
-              <div
-                key={a.slug}
-                className="reveal"
-                ref={(el) => {
-                  cardRefs.current[i] = el;
-                }}
-                style={{ animationDelay: `${i * 0.1}s` }}
-              >
+              <ScrollReveal key={a.slug} delay={i * 0.1}>
                 <ArticleCard {...a} />
-              </div>
+              </ScrollReveal>
             ))}
-          </div>
+          </div>}
         </section>
       )}
 

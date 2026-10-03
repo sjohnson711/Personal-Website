@@ -32,7 +32,7 @@ export default function GatewayPage() {
         <div style={{ textAlign: "center", marginBottom: isMobile ? "1.75rem" : "2.5rem" }}>
           <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                        fontSize: isMobile ? "1.2rem" : "1.4rem",
-                       fontWeight: 700, color: "#0F1B35", margin: "0 0 0.4rem", letterSpacing: "-0.01em" }}>
+                       fontWeight: 700, color: "var(--color-navy)", margin: "0 0 0.4rem", letterSpacing: "-0.01em" }}>
             Seth Johnson
           </h1>
           <div style={{ width: "32px", height: "2px", background: "linear-gradient(90deg, #B8962E, rgba(184,150,46,0.3))", borderRadius: "1px", margin: "0 auto" }} />
@@ -42,8 +42,8 @@ export default function GatewayPage() {
           <div style={{ marginBottom: isMobile ? "1.25rem" : "2rem" }}>
             <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                          fontSize: isMobile ? "1.25rem" : "1.5rem",
-                         fontWeight: 700, color: "#0F1B35", margin: "0 0 0.35rem" }}>Admin Sign In</h2>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#A8A29E", fontSize: "0.83rem", margin: 0 }}>Author access only.</p>
+                         fontWeight: 700, color: "var(--color-navy)", margin: "0 0 0.35rem" }}>Admin Sign In</h2>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.83rem", margin: 0 }}>Author access only.</p>
           </div>
 
           {/* role="alert" forces an assertive screen-reader announcement on
@@ -94,7 +94,7 @@ export default function GatewayPage() {
           </form>
         </div>
 
-        <p style={{ textAlign: "center", fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.72rem", marginTop: "1.5rem" }}>
+        <p style={{ textAlign: "center", fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.72rem", marginTop: "1.5rem" }}>
           This page is not publicly linked.
         </p>
       </div>

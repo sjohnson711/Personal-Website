@@ -37,18 +37,18 @@ export default function Layout() {
                 fontFamily: '"Playfair Display", Georgia, serif',
                 fontWeight: 700,
                 fontSize: "1rem",
-                color: "#0F1B35",
+                color: "var(--color-navy)",
                 letterSpacing: "0.01em",
               }}
             >
               Seth Johnson
             </span>
-            <span style={{ color: "#A8A29E", fontSize: "0.75rem" }}>
+            <span style={{ color: "var(--color-slate)", fontSize: "0.75rem" }}>
               Author · Software Engineer · Mental Health Therapist
             </span>
           </div>
 
-          <span style={{ color: "#C4BAB0", fontSize: "0.78rem" }}>
+          <span style={{ color: "var(--color-slate)", fontSize: "0.78rem" }}>
             © {new Date().getFullYear()} Seth Johnson. All rights reserved.
           </span>
         </div>

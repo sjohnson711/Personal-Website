@@ -80,7 +80,7 @@ export default function AdminArticleRow({
           <p
             style={{
               fontFamily: '"DM Sans", sans-serif',
-              color: "#C4BAB0",
+              color: "var(--color-slate)",
               fontSize: "0.72rem",
               margin: "0.25rem 0 0",
               wordBreak: "break-word",
@@ -158,7 +158,7 @@ export default function AdminArticleRow({
         <p
           style={{
             fontFamily: '"DM Sans", sans-serif',
-            color: "#C4BAB0",
+            color: "var(--color-slate)",
             fontSize: "0.73rem",
             margin: "0.2rem 0 0",
           }}

@@ -28,18 +28,18 @@ export default function EditArticlePage() {
   }, [id]);
 
   if (loading) return (
-    <div style={{ padding: "6rem", textAlign: "center", fontFamily: '"DM Sans", sans-serif', color: "#A8A29E" }}>Loading…</div>
+    <div style={{ padding: "6rem", textAlign: "center", fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)" }}>Loading…</div>
   );
 
   if (notFound || !article) return (
     <div style={{ maxWidth: "860px", margin: "0 auto",
                   padding: isMobile ? "3rem 1rem" : "4.5rem 1.5rem" }}>
-      <Link to="/admin/dashboard" style={{ fontFamily: '"DM Sans", sans-serif', color: "#7A5C10", textDecoration: "none", fontSize: "0.83rem", fontWeight: 600 }}>← Dashboard</Link>
+      <Link to="/admin/dashboard" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", textDecoration: "none", fontSize: "0.83rem", fontWeight: 600 }}>← Dashboard</Link>
       <div style={{ background: "#FFFFFF", border: "1px solid #EAE4D8", borderRadius: "0.875rem",
                     padding: isMobile ? "2rem 1.25rem" : "4rem",
                     textAlign: "center", marginTop: "2rem" }}>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.65rem", color: "#0F1B35" }}>Article Not Found</h1>
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#A8A29E", marginTop: "0.75rem" }}>This article doesn't exist or has been removed.</p>
+        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "1.65rem", color: "var(--color-navy)" }}>Article Not Found</h1>
+        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", marginTop: "0.75rem" }}>This article doesn't exist or has been removed.</p>
       </div>
     </div>
   );
@@ -48,16 +48,16 @@ export default function EditArticlePage() {
     <div className="fade-up" style={{ maxWidth: "860px", margin: "0 auto",
                                       padding: isMobile ? "3rem 1rem 4rem" : "4.5rem 1.5rem 7rem" }}>
       <div style={{ marginBottom: isMobile ? "1.5rem" : "2.5rem" }}>
-        <Link to="/admin/dashboard" style={{ fontFamily: '"DM Sans", sans-serif', color: "#7A5C10", textDecoration: "none", fontSize: "0.83rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "0.3rem", marginBottom: "1.5rem" }}>
+        <Link to="/admin/dashboard" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", textDecoration: "none", fontSize: "0.83rem", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "0.3rem", marginBottom: "1.5rem" }}>
           ← Dashboard
         </Link>
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#B8962E", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "0.4rem" }}>Admin</p>
+        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "0.4rem" }}>Admin</p>
         <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                      fontSize: "clamp(1.55rem, 6vw, 2.2rem)",
-                     fontWeight: 900, color: "#0F1B35", margin: 0, letterSpacing: "-0.02em" }}>Edit Article</h1>
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#A8A29E", fontSize: "0.85rem", margin: "0.5rem 0 0",
+                     fontWeight: 900, color: "var(--color-navy)", margin: 0, letterSpacing: "-0.02em" }}>Edit Article</h1>
+        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.85rem", margin: "0.5rem 0 0",
                     wordBreak: "break-word" }}>
-          Editing: <span style={{ color: "#6B6560" }}>{article.title}</span>
+          Editing: <span style={{ color: "var(--color-slate)" }}>{article.title}</span>
         </p>
       </div>
 

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { api } from "../lib/api";
 import { useIsMobile } from "../lib/useMediaQuery";
 
@@ -14,33 +15,87 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const isMobile = useIsMobile();
+  const layerRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestVersion = useRef(0);
+  const onCloseRef = useRef(onClose);
 
-  // Allow keyboard users to dismiss the modal with the Escape key, per the
-  // WAI-ARIA Authoring Practices "dialog" pattern.
+  useEffect(() => { onCloseRef.current = onClose; }, [onClose]);
+
   useEffect(() => {
     if (!isOpen) return;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    setStatus("idle");
+    setErrorMsg("");
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const background = Array.from(document.body.children)
+      .filter((element): element is HTMLElement => element instanceof HTMLElement && element !== layerRef.current)
+      .map((element) => ({ element, wasInert: element.inert }));
+    background.forEach(({ element }) => { element.inert = true; });
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.querySelector<HTMLInputElement>("#contact-name")?.focus();
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onCloseRef.current();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const controls = Array.from(dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex="0"]',
+      ));
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      if (!first) {
+        e.preventDefault();
+        dialog.focus();
+      } else if (e.shiftKey && (document.activeElement === first || document.activeElement === dialog || !dialog.contains(document.activeElement))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !dialog.contains(document.activeElement))) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    const containFocus = (e: FocusEvent) => {
+      if (e.target instanceof Node && !dialog.contains(e.target)) dialog.focus();
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
+    document.addEventListener("focusin", containFocus);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.removeEventListener("focusin", containFocus);
+      background.forEach(({ element, wasInert }) => { element.inert = wasInert; });
+      document.body.style.overflow = previousOverflow;
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+      requestVersion.current += 1;
+      if (previousFocus?.isConnected) previousFocus.focus();
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const version = requestVersion.current;
     setStatus("loading");
 
     try {
       await api.post("/contact", { name, email, message });
+      if (version !== requestVersion.current) return;
       setStatus("success");
       setName("");
       setEmail("");
       setMessage("");
-      setTimeout(() => {
-        onClose();
+      closeTimer.current = setTimeout(() => {
+        onCloseRef.current();
         setStatus("idle");
       }, 2000);
     } catch (err) {
+      if (version !== requestVersion.current) return;
       setStatus("error");
       setErrorMsg(
         err instanceof Error ? err.message : "Network error — please try again."
@@ -50,8 +105,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
 
   if (!isOpen) return null;
 
-  return (
-    <>
+  return createPortal(
+    <div ref={layerRef}>
       {/* Backdrop. aria-hidden so screen readers ignore it — the dialog itself
           is the focusable region. */}
       <div
@@ -72,6 +127,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           modal dialog. aria-labelledby points at the heading so screen readers
           announce the dialog's purpose on open. */}
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-labelledby="contact-modal-heading"
@@ -106,7 +163,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             border: "none",
             fontSize: "1.5rem",
             cursor: "pointer",
-            color: "#A8A29E",
+            color: "var(--color-slate)",
           }}
         >
           <span aria-hidden="true">✕</span>
@@ -118,7 +175,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             fontFamily: '"Playfair Display", Georgia, serif',
             fontSize: isMobile ? "1.3rem" : "1.65rem",
             fontWeight: 700,
-            color: "#0F1B35",
+            color: "var(--color-navy)",
             margin: "0 0 0.5rem",
           }}
         >
@@ -127,7 +184,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
         <p
           style={{
             fontFamily: '"DM Sans", sans-serif',
-            color: "#6B6560",
+            color: "var(--color-slate)",
             fontSize: isMobile ? "0.88rem" : "0.95rem",
             margin: isMobile ? "0 0 1.25rem" : "0 0 2rem",
           }}
@@ -145,7 +202,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: "0.7rem",
                 fontWeight: 700,
-                color: "#B8962E",
+                color: "var(--color-gold-ink)",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 marginBottom: "0.5rem",
@@ -169,11 +226,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: isMobile ? "16px" : "0.95rem",
                 color: "#1C1917",
-                outline: "none",
                 transition: "border-color 0.15s",
               }}
-              onFocus={(e) => (e.target.style.borderColor = "#B8962E")}
-              onBlur={(e) => (e.target.style.borderColor = "#D8D0C4")}
             />
           </div>
 
@@ -186,7 +240,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: "0.7rem",
                 fontWeight: 700,
-                color: "#B8962E",
+                color: "var(--color-gold-ink)",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 marginBottom: "0.5rem",
@@ -210,11 +264,8 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: isMobile ? "16px" : "0.95rem",
                 color: "#1C1917",
-                outline: "none",
                 transition: "border-color 0.15s",
               }}
-              onFocus={(e) => (e.target.style.borderColor = "#B8962E")}
-              onBlur={(e) => (e.target.style.borderColor = "#D8D0C4")}
             />
           </div>
 
@@ -227,7 +278,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: "0.7rem",
                 fontWeight: 700,
-                color: "#B8962E",
+                color: "var(--color-gold-ink)",
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
                 marginBottom: "0.5rem",
@@ -250,12 +301,9 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: isMobile ? "16px" : "0.95rem",
                 color: "#1C1917",
-                outline: "none",
                 transition: "border-color 0.15s",
                 resize: "vertical",
               }}
-              onFocus={(e) => (e.target.style.borderColor = "#B8962E")}
-              onBlur={(e) => (e.target.style.borderColor = "#D8D0C4")}
             />
           </div>
 
@@ -286,7 +334,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
               role="status"
               aria-live="polite"
               style={{
-                color: "#40916C",
+                color: "var(--color-success)",
                 fontSize: "0.9rem",
                 margin: 0,
                 padding: "0.75rem 1rem",
@@ -306,7 +354,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
             style={{
               padding: "0.85rem 1.75rem",
               borderRadius: "0.5rem",
-              background: status === "success" ? "#40916C" : "#0F1B35",
+              background: status === "success" ? "var(--color-success)" : "var(--color-navy)",
               color: "#FFF7ED",
               border: "none",
               fontFamily: '"DM Sans", sans-serif',
@@ -321,6 +369,7 @@ export default function ContactModal({ isOpen, onClose }: ContactModalProps) {
           </button>
         </form>
       </div>
-    </>
+    </div>,
+    document.body,
   );
 }

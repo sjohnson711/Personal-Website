@@ -109,7 +109,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
           aria-required="true"
           placeholder="Your article title"
           className="field-input"
-          style={{ fontSize: isMobile ? "1rem" : "1.05rem", fontFamily: '"Playfair Display", Georgia, serif', color: "#0F1B35" }}
+          style={{ fontSize: isMobile ? "1rem" : "1.05rem", fontFamily: '"Playfair Display", Georgia, serif', color: "var(--color-navy)" }}
         />
       </div>
 
@@ -126,8 +126,8 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
           placeholder="url-friendly-slug"
           className="field-input"
         />
-        <p id="article-slug-help" style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.73rem", marginTop: "0.35rem" }}>
-          Public URL: <span style={{ color: "#B8962E" }}>/articles/{slug || "your-slug"}</span>
+        <p id="article-slug-help" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.73rem", marginTop: "0.35rem" }}>
+          Public URL: <span style={{ color: "var(--color-gold-ink)" }}>/articles/{slug || "your-slug"}</span>
         </p>
       </div>
 
@@ -148,7 +148,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
       <div>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.42rem" }}>
           <label htmlFor="article-content" className="field-label" style={{ marginBottom: 0 }}>Content</label>
-          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.7rem" }}>Markdown supported · paste an image to embed it · a link on its own line becomes a rich embed</span>
+          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem" }}>Markdown supported · paste an image to embed it · a link on its own line becomes a rich embed</span>
         </div>
         <textarea
           ref={contentRef}
@@ -166,7 +166,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
                    fontSize: isMobile ? "0.85rem" : "0.87rem",
                    lineHeight: 1.65 }}
         />
-        <p id="article-content-count" style={{ fontFamily: '"DM Sans", sans-serif', color: "#C4BAB0", fontSize: "0.7rem", marginTop: "0.35rem", textAlign: "right" }}>
+        <p id="article-content-count" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem", marginTop: "0.35rem", textAlign: "right" }}>
           {content.length.toLocaleString()} characters
         </p>
       </div>
@@ -189,13 +189,13 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
           checked={published}
           onChange={(e) => setPublished(e.target.checked)}
           aria-describedby="article-published-help"
-          style={{ width: "1.1rem", height: "1.1rem", accentColor: "#B8962E", cursor: "pointer", flexShrink: 0 }}
+          style={{ width: "1.1rem", height: "1.1rem", accentColor: "var(--color-gold-ink)", cursor: "pointer", flexShrink: 0 }}
         />
         <div>
           <p style={{ fontFamily: '"DM Sans", sans-serif', color: published ? "#7A5C10" : "#1C1917", fontWeight: 600, fontSize: "0.92rem", margin: 0 }}>
             {published ? "Published — visible to all readers" : "Save as Draft"}
           </p>
-          <p id="article-published-help" style={{ fontFamily: '"DM Sans", sans-serif', color: "#A8A29E", fontSize: "0.76rem", margin: "0.15rem 0 0" }}>
+          <p id="article-published-help" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.76rem", margin: "0.15rem 0 0" }}>
             {published ? "Uncheck to revert to draft at any time." : "Check to make this article live on your site."}
           </p>
         </div>

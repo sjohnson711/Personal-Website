@@ -17,6 +17,7 @@ export default function Navbar() {
   const isMobile = useIsMobile();
   const [menuOpen, setMenuOpen] = useState(false);
   const navRef = useRef<HTMLElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
 
   async function handleLogout() {
     setMenuOpen(false);
@@ -42,8 +43,18 @@ export default function Navbar() {
         setMenuOpen(false);
       }
     }
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    }
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [menuOpen]);
 
   const linkColor = (active: boolean) => (active ? "#0F1B35" : "#6B6560");
@@ -81,7 +92,7 @@ export default function Navbar() {
             fontFamily: '"Playfair Display", Georgia, serif',
             fontSize: isMobile ? "1rem" : "1.1rem",
             fontWeight: 700,
-            color: "#0F1B35",
+            color: "var(--color-navy)",
             textDecoration: "none",
             letterSpacing: "0.02em",
             flexShrink: 0,
@@ -159,7 +170,7 @@ export default function Navbar() {
                   borderRadius: "0.4rem",
                   border: "1px solid #D8D0C4",
                   background: "transparent",
-                  color: "#6B6560",
+                  color: "var(--color-slate)",
                   fontFamily: '"DM Sans", sans-serif',
                   fontWeight: 500,
                   fontSize: "0.83rem",
@@ -176,6 +187,7 @@ export default function Navbar() {
         {/* Mobile hamburger */}
         {isMobile && (
           <button
+            ref={menuButtonRef}
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
@@ -190,7 +202,7 @@ export default function Navbar() {
               background: "transparent",
               border: "1px solid transparent",
               borderRadius: "0.4rem",
-              color: "#0F1B35",
+              color: "var(--color-navy)",
               cursor: "pointer",
               flexShrink: 0,
             }}
@@ -204,6 +216,9 @@ export default function Navbar() {
       {isMobile && (
         <div
           id="mobile-nav-panel"
+          className="mobile-nav-panel"
+          inert={!menuOpen}
+          aria-hidden={!menuOpen}
           style={{
             overflow: "hidden",
             maxHeight: menuOpen ? "420px" : "0",
@@ -285,7 +300,7 @@ export default function Navbar() {
                     borderRadius: "0.4rem",
                     border: "1px solid #D8D0C4",
                     background: "transparent",
-                    color: "#6B6560",
+                    color: "var(--color-slate)",
                     fontFamily: '"DM Sans", sans-serif',
                     fontWeight: 500,
                     fontSize: "0.95rem",

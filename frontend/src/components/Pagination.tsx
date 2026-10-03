@@ -16,7 +16,7 @@ export default function Pagination({ currentPage, totalPages, basePath = "/artic
     justifyContent: "center",
     borderRadius: "0.42rem",
     fontFamily: '"DM Sans", sans-serif',
-    color: "#6B6560",
+    color: "var(--color-slate)",
     textDecoration: "none",
     fontSize: isMobile ? "0.82rem" : "0.85rem",
     fontWeight: 500,
