@@ -1,134 +1,61 @@
 import { useState } from "react";
+import { ArrowUpRight, Mail } from "lucide-react";
 import ContactModal from "../components/ContactModal";
-import { useIsMobile } from "../lib/useMediaQuery";
+
+const background = [
+  { label: "Education", details: ["M.A. Clinical Mental Health Counseling, Webster University", "Full-Stack Software Engineering, Code The Dream"] },
+  { label: "Community & mentorship", details: ["Code The Dream tech mentor", "CodePath Tech Fellow"] },
+  { label: "Training & honors", details: ["Honors in AI-Applied Engineering, CodePath", "Technical Interviewing, CodePath"] },
+  { label: "Speaking", details: ["Beyond the Armor Podcast"] },
+];
 
 export default function AboutPage() {
   const [showContact, setShowContact] = useState(false);
-  const isMobile = useIsMobile();
-  const highlights = [
-    { label: "Volunteer Work",  value: "CodeTheDream Tech Mentor" },
-    { label: "Speaking",         value: "Beyond the Armor Podcast" },
-    { label: "Awards",           value: "Honors: AI-Applied Engineering (CodePath)" },
-    { label: "Education",        value: "M.A. Clinical Mental Health Counseling (Webster University);  Full-Stack Software Engineering (Code The Dream)" },
-  ];
-  const social = [
-    { label: "LinkedIn",    href: "https://www.linkedin.com/in/seth-johnson-10a6a217b/" },
-    { label: "Email",       href: "contact" },
-  ];
 
   return (
-    <div className="fade-up" style={{ maxWidth: "860px", margin: "0 auto",
-                                       padding: isMobile ? "3rem 1rem 4rem" : "5.5rem 1.5rem 7rem" }}>
-
-      <header style={{ marginBottom: isMobile ? "2.25rem" : "4rem" }}>
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", fontSize: "0.7rem", fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: "0.65rem" }}>
-          The Author
-        </p>
-        <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif', fontSize: "clamp(2.2rem, 4vw, 2.8rem)", fontWeight: 900, color: "var(--color-navy)", margin: 0, lineHeight: 1.1, letterSpacing: "-0.02em" }}>
-          About Seth Johnson
-        </h1>
-        <div className="gold-rule" />
+    <div className="about-page fade-up">
+      <header className="about-header">
+        <p className="about-eyebrow">About the author</p>
+        <h1>Seth Johnson</h1>
       </header>
 
-      {/* Bio card */}
-      <section className="card no-lift" style={{ padding: isMobile ? "1.5rem 1.25rem" : "2.75rem",
-                                                  display: "grid",
-                                                  gridTemplateColumns: isMobile ? "1fr" : "auto 1fr",
-                                                  gap: isMobile ? "1.25rem" : "2.75rem",
-                                                  alignItems: "flex-start",
-                                                  justifyItems: isMobile ? "center" : "stretch",
-                                                  marginBottom: "2rem" }}>
-        <img
-          src="/Proifleofficepic.png"
-          alt="Seth Johnson"
-          style={{
-            width: isMobile ? "130px" : "155px",
-            height: isMobile ? "165px" : "195px",
-            flexShrink: 0, borderRadius: "0.6rem",
-            objectFit: "cover", objectPosition: "center",
-            border: "1px solid #D8D0C4",
-            boxShadow: "0 2px 12px rgba(28,25,23,0.08)",
-            imageRendering: "auto",
-            WebkitFontSmoothing: "antialiased",
-            backfaceVisibility: "hidden",
-            marginTop: isMobile ? 0 : "8rem",
-          }}
-        />
+      <section className="about-profile" aria-labelledby="about-role">
+        <figure className="about-portrait">
+          <img src="/Proifleofficepic.png" alt="Portrait of Seth Johnson" width={500} height={500} />
+        </figure>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "1.1rem", width: "100%" }}>
-          <div>
-            <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
-                         fontSize: isMobile ? "1.35rem" : "1.65rem",
-                         fontWeight: 700, color: "var(--color-navy)", margin: "0 0 0.3rem",
-                         textAlign: isMobile ? "center" : "left" }}>Seth Johnson</h2>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0,
-                        textAlign: isMobile ? "center" : "left" }}>
-              Software Engineer &amp; Mental Health Therapist
-            </p>
+        <div className="about-bio">
+          <h2 id="about-role">Software Engineer &amp;<br /> Mental Health Therapist</h2>
+          <p className="about-lead">
+            Born and raised in Georgia, Seth Johnson has spent over a decade in human services, with a passion for educating children from underserved communities.
+          </p>
+          <p>
+            His work includes serving as Residential Program Director at Landmark for Families in Charleston, South Carolina. With a master's in Clinical Mental Health Counseling and a decade of community work, his transition to technology was an expansion of that mission.
+          </p>
+          <p>
+            A Code The Dream full-stack graduate with CodePath training in AI Applied Engineering and Technical Interviewing, Seth brings React and Node.js expertise to his commitment to equity. Today, as a CodePath Tech Fellow and Code The Dream mentor, he uses technology to expand opportunity.
+          </p>
+          <div className="about-connect" aria-label="Connect with Seth">
+            <a href="https://www.linkedin.com/in/seth-johnson-10a6a217b/" target="_blank" rel="noopener noreferrer" className="about-connect-link">
+              LinkedIn <ArrowUpRight size={18} aria-hidden="true" />
+            </a>
+            <button type="button" onClick={() => setShowContact(true)} className="about-connect-link">
+              <Mail size={18} aria-hidden="true" /> Email
+            </button>
           </div>
-          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "#4A4540", lineHeight: 1.85, margin: 0, fontSize: "0.97rem" }}>
-            Seth Johnson is a Software Engineer and Mental Health Therapist with a passion for educating kids from impoverished communities. Born and raised in Georgia, Seth has spent over a decade in human services, including serving as a former Residential Program Director at Landmark for Families in Charleston, South Carolina.
-          </p>
-          <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", lineHeight: 1.85, margin: 0, fontSize: "0.95rem" }}>
-            With a <span style={{ fontWeight: 600, color: "#4A4540" }}>Master's in Clinical Mental Health Counseling</span> and a decade of community work, Seth's transition to technology was intentional—an expansion of his mission, not an escape. A <span style={{ fontWeight: 600, color: "#4A4540" }}>Code The Dream full-stack graduate</span> with certifications in <span style={{ fontWeight: 600, color: "#4A4540" }}>AI Applied Engineering and Technical Interviewing through CodePath</span>, Seth combines deep expertise in React and Node.js with his commitment to equity. Today, as a <span style={{ fontWeight: 600, color: "#4A4540" }}>CodePath Tech Fellow and Code The Dream mentor</span>, he uses technology to expand opportunity in underserved communities.
-          </p>
         </div>
       </section>
 
-      {/* Highlights */}
-      <section style={{ marginBottom: "2rem" }}>
-        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
-                     fontSize: isMobile ? "1.2rem" : "1.35rem",
-                     fontWeight: 700, color: "var(--color-navy)", marginBottom: "1.25rem" }}>Highlights</h2>
-        <div style={{ display: "grid",
-                      gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(195px, 1fr))",
-                      gap: "1rem" }}>
-          {highlights.map(({ label, value }) => (
-            <div key={label} style={{ background: "#FFFFFF", border: "1px solid #EAE4D8", borderRadius: "0.75rem", padding: "1.25rem", boxShadow: "0 1px 4px rgba(28,25,23,0.05)" }}>
-              <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-gold-ink)", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", margin: "0 0 0.5rem" }}>{label}</p>
-              <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.87rem", lineHeight: 1.55, margin: 0 }}>{value}</p>
+      <section className="about-background" aria-labelledby="about-background-heading">
+        <h2 id="about-background-heading">Background &amp; contributions</h2>
+        <dl className="about-details">
+          {background.map(({ label, details }) => (
+            <div key={label} className="about-detail">
+              <dt>{label}</dt>
+              <dd>{details.map(detail => <p key={detail}>{detail}</p>)}</dd>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* Connect */}
-      <section className="card no-lift" style={{ padding: isMobile ? "1.5rem 1.25rem" : "2rem 2.5rem" }}>
-        <h2 style={{ fontFamily: '"Playfair Display", Georgia, serif',
-                     fontSize: isMobile ? "1.2rem" : "1.35rem",
-                     fontWeight: 700, color: "var(--color-navy)", marginBottom: "1.25rem" }}>Connect</h2>
-        <div style={{ display: "flex", gap: "0.7rem", flexWrap: "wrap" }}>
-          {social.map(({ label, href }) => {
-            const isExternal = href.startsWith("http");
-            const isContact = href === "contact";
-
-            if (isContact) {
-              return (
-                <button
-                  key={label}
-                  onClick={() => setShowContact(true)}
-                  className="btn-outline"
-                  style={{ borderRadius: "2rem", border: "1px solid rgba(184, 150, 46, 0.45)" }}
-                >
-                  {label}
-                </button>
-              );
-            }
-
-            return (
-              <a
-                key={label}
-                href={href}
-                className="btn-outline"
-                style={{ borderRadius: "2rem" }}
-                target={isExternal ? "_blank" : undefined}
-                rel={isExternal ? "noopener noreferrer" : undefined}
-              >
-                {label}
-              </a>
-            );
-          })}
-        </div>
+        </dl>
       </section>
 
       <ContactModal isOpen={showContact} onClose={() => setShowContact(false)} />

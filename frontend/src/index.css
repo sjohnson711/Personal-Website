@@ -1,6 +1,43 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
+.about-page { max-width: 1120px; margin: 0 auto; padding: 4rem 2rem 5rem; }
+.about-header { margin-bottom: 2.5rem; }
+.about-eyebrow { margin: 0 0 .65rem; color: var(--color-gold-ink); font-size: .8rem; font-weight: 700; letter-spacing: 0; }
+.about-header h1 { margin: 0; font-family: var(--font-display); font-size: 2.75rem; font-weight: 700; line-height: 1.15; color: var(--color-navy); letter-spacing: 0; }
+.about-profile { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 3rem; align-items: start; }
+.about-portrait { margin: 0; width: 100%; aspect-ratio: 1; }
+.about-portrait img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+.about-bio { min-width: 0; }
+.about-bio h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; line-height: 1.35; color: var(--color-navy); margin: 0 0 1.25rem; letter-spacing: 0; }
+.about-bio p { color: #4a4540; line-height: 1.75; font-size: .96rem; margin: 0 0 1rem; }
+.about-bio .about-lead { font-size: 1.05rem; color: var(--color-ink); }
+.about-connect { display: flex; flex-wrap: wrap; gap: .5rem 1.75rem; margin-top: 1.25rem; }
+.about-connect-link { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; color: var(--color-gold-ink); font: 600 .9rem var(--font-sans); background: transparent; padding: 0; border: 0; cursor: pointer; text-decoration: none; }
+.about-connect-link:hover { color: var(--color-navy); text-decoration: underline; text-underline-offset: 4px; }
+.about-connect-link:focus-visible { outline: 2px solid var(--color-gold-ink); outline-offset: 5px; border-radius: 2px; }
+.about-background { border-top: 1px solid var(--color-rule); margin-top: 3rem; padding-top: 2rem; }
+.about-background h2 { font-family: var(--font-display); color: var(--color-navy); font-size: 1.5rem; font-weight: 600; margin: 0 0 1.5rem; letter-spacing: 0; }
+.about-details { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 3rem; }
+.about-detail { padding: 1.25rem 0; border-top: 1px solid var(--color-rule); }
+.about-detail dt { color: var(--color-gold-ink); font-size: .82rem; font-weight: 700; margin-bottom: .6rem; }
+.about-detail dd { margin: 0; color: #4a4540; font-size: .94rem; line-height: 1.7; }
+.about-detail dd p { margin: 0; }
+@media (max-width: 900px) {
+  .about-profile { grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 2rem; }
+  .about-page { padding: 3rem 1.5rem 4rem; }
+}
+@media (max-width: 700px) {
+  .about-page { padding: 2.5rem 1.25rem 3.5rem; }
+  .about-header { margin-bottom: 1.5rem; }
+  .about-header h1 { font-size: 2.1rem; }
+  .about-profile { grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+  .about-portrait { max-width: 320px; }
+  .about-bio h2 { font-size: 1.4rem; }
+  .about-details { grid-template-columns: minmax(0, 1fr); }
+  .about-background { margin-top: 2rem; }
+}
+
 .analytics-page { max-width: 1120px; margin: 0 auto; padding: 3rem 1rem; }
 .analytics-page h1, .analytics-page h2 { font-family: "Playfair Display", Georgia, serif; color: var(--color-navy); }
 .analytics-page h1 { font-size: 2rem; font-weight: 900; }
