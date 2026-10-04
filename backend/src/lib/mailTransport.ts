@@ -8,7 +8,14 @@ export class MailError extends Error {
   constructor(public code: string, public transient: boolean) { super(code); }
 }
 
+export function mailDeliveryEnabled(): boolean {
+  if (process.env.MAIL_MODE === "disabled") return false;
+  if (process.env.MAIL_MODE === "capture") return process.env.NODE_ENV !== "production" && Boolean(process.env.MAIL_CAPTURE_PATH);
+  return Boolean(process.env.RESEND_API_KEY);
+}
+
 export async function sendMail(mail: Mail, idempotencyKey?: string): Promise<string> {
+  if (process.env.MAIL_MODE === "disabled") throw new MailError("email_delivery_disabled", false);
   if (process.env.MAIL_MODE === "capture") {
     if (process.env.NODE_ENV === "production") throw new MailError("capture_disabled_in_production", false);
     const path = process.env.MAIL_CAPTURE_PATH;

@@ -21,7 +21,7 @@ export default function AnalyticsPage() {
   const [page, setPage] = useState(1);
   const [subPage, setSubPage] = useState(1);
   const [attempt, setAttempt] = useState(0);
-  const [data, setData] = useState<{ summary: Summary; activity: Collection<Activity>; subscribers: Collection<Subscriber>; jobs: Job[] } | null>(null);
+  const [data, setData] = useState<{ summary: Summary; activity: Collection<Activity>; subscribers: Collection<Subscriber>; jobs: Job[]; deliveryEnabled: boolean } | null>(null);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function AnalyticsPage() {
     setLoading(true); setError(false);
     Promise.all([api.get(`/analytics/summary?days=${days}`), api.get(`/analytics/activity?days=${days}&page=${page}`),
       api.get(`/analytics/subscribers?page=${subPage}`), api.get("/analytics/notifications")])
-      .then(([summary, activity, subscribers, jobs]) => { if (active) setData({ summary, activity, subscribers, jobs: jobs.items }); })
+      .then(([summary, activity, subscribers, jobs]) => { if (active) setData({ summary, activity, subscribers, jobs: jobs.items, deliveryEnabled: jobs.deliveryEnabled }); })
       .catch(() => { if (active) setError(true); }).finally(() => { if (active) setLoading(false); });
     return () => { active = false; };
   }, [days, page, subPage, attempt]);
@@ -60,7 +60,7 @@ export default function AnalyticsPage() {
         {data.subscribers.items.length === 0 ? <p>No active subscribers.</p> : <div className="analytics-table-wrap"><table><thead><tr><th>Submitted email (unverified)</th><th>Subscribed</th></tr></thead><tbody>{data.subscribers.items.map((s) => <tr key={s.id}><td>{s.email}</td><td>{date(s.createdAt)}</td></tr>)}</tbody></table></div>}
         <Pager page={subPage} pages={data.subscribers.totalPages} setPage={setSubPage} label="Subscribers" />
       </section>
-      <section className="card no-lift analytics-panel"><h2>Latest signup alerts</h2><p>“Sent” means accepted by the email service, not confirmed inbox delivery. Pending alerts retry automatically; failed alerts need investigation.</p>
+      <section className="card no-lift analytics-panel"><h2>Latest signup alerts</h2>{data.deliveryEnabled ? <p>“Sent” means accepted by the email service, not confirmed inbox delivery. Pending alerts retry automatically; failed alerts need investigation.</p> : <p role="status">Email delivery is currently disabled. Subscriptions are saved, and signup alerts stay pending for up to 90 days.</p>}
         {data.jobs.length === 0 ? <p>No signup alerts yet.</p> : <div className="analytics-table-wrap"><table><thead><tr><th>Subscriber email</th><th>Status</th><th>Attempts</th><th>Signup</th></tr></thead><tbody>{data.jobs.map((j) => <tr key={j.id}><td>{j.subscriberEmail}</td><td>{j.status}{j.lastError && <small> · {j.lastError}</small>}</td><td>{j.attempts}</td><td>{date(j.signupAt)}</td></tr>)}</tbody></table></div>}
       </section>
     </>}

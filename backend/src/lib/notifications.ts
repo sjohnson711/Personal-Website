@@ -1,13 +1,14 @@
 import { prisma } from "./prisma";
-import { sendMail, Mail, MailError, escapeHtml } from "./mailTransport";
+import { sendMail, Mail, MailError, escapeHtml, mailDeliveryEnabled } from "./mailTransport";
 
 const RETRY_WINDOW = 23 * 60 * 60_000;
 const LEASE_MS = 2 * 60_000;
 export type MailSender = (mail: Mail, key?: string) => Promise<string>;
 
 export async function processNotifications(send: MailSender = sendMail, now = new Date()): Promise<void> {
+  if (send === sendMail && !mailDeliveryEnabled()) return;
   for (let count = 0; count < 20; count++) {
-    const job = await prisma.notificationJob.findFirst({ where: { OR: [
+    const job = await prisma.notificationJob.findFirst({ where: { createdAt: { gte: new Date(now.getTime() - 90 * 24 * 60 * 60_000) }, OR: [
       { status: "pending", nextAttemptAt: { lte: now } }, { status: "processing", leaseUntil: { lte: now } },
     ] }, orderBy: { nextAttemptAt: "asc" } });
     if (!job) return;

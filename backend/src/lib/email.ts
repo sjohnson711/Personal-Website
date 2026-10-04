@@ -1,7 +1,8 @@
 import { prisma } from "./prisma";
-import { sendMail, escapeHtml } from "./mailTransport";
+import { sendMail, escapeHtml, mailDeliveryEnabled } from "./mailTransport";
 
 export async function notifySubscribers(article: { title: string; slug: string; excerpt: string }): Promise<void> {
+  if (!mailDeliveryEnabled()) return;
   const siteUrl = process.env.SITE_URL ?? "http://localhost:5173";
   const apiUrl = process.env.PUBLIC_API_URL ?? "https://personal-website-production-b2f4.up.railway.app/api";
   const subscribers = await prisma.subscriber.findMany();

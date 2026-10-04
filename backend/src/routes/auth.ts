@@ -1,4 +1,5 @@
 import { Router, Request, Response } from "express";
+import { createHash } from "node:crypto";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
@@ -58,6 +59,14 @@ router.post("/logout", (_req: Request, res: Response): void => {
 });
 
 router.get("/me", requireAuth, (req: AuthRequest, res: Response): void => {
+  // Temporary authenticated release check. Returns booleans/counts only; remove after verification.
+  if (req.query.proxyProbe === "1") {
+    const forwarded = (req.get("X-Forwarded-For") ?? "").split(",").map((v) => v.trim()).filter(Boolean);
+    const expected = req.get("X-Release-Expected-Ip-Hash") ?? "";
+    res.json({ email: req.adminEmail, proxyProbe: { forwardedCount: forwarded.length,
+      matchingClientIndex: forwarded.findIndex((ip) => createHash("sha256").update(ip).digest("hex") === expected),
+      sentinelPresent: forwarded.includes("203.0.113.7") || forwarded.includes("203.0.113.8") } }); return;
+  }
   res.json({ email: req.adminEmail });
 });
 

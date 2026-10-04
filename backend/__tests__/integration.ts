@@ -90,6 +90,19 @@ async function main() {
     const mails = (await readFile(process.env.MAIL_CAPTURE_PATH!, "utf8")).trim().split("\n").map((line) => JSON.parse(line));
     assert.equal(mails[0].to, "samaritanbrotherseth@gmail.com");
     assert.match(mails[1].html, /&lt;script&gt;/); assert.doesNotMatch(mails[1].html, /<script|<img/); check("captured signup alert and escaped contact email");
+    const pausedAlert = await prisma.notificationJob.create({ data: { subscriberEmail: "paused@example.com", signupAt: new Date() } });
+    process.env.MAIL_MODE = "disabled";
+    await processNotifications();
+    const pausedJob = (await prisma.notificationJob.findUnique({ where: { id: pausedAlert.id } }))!;
+    assert.equal(pausedJob.status, "pending"); assert.equal(pausedJob.attempts, 0); assert.equal(pausedJob.firstAttemptAt, null);
+    const pausedStatus = await (await request("/analytics/notifications", "GET", undefined, true)).json() as any;
+    assert.equal(pausedStatus.deliveryEnabled, false);
+    assert.equal((await request("/contact", "POST", { name: "Reader", email: "reader@example.com", message: "Hello" })).status, 503);
+    assert.equal((await readFile(process.env.MAIL_CAPTURE_PATH!, "utf8")).trim().split("\n").length, 2);
+    process.env.MAIL_MODE = "capture";
+    await processNotifications();
+    assert.equal((await prisma.notificationJob.findUnique({ where: { id: pausedAlert.id } }))!.status, "sent");
+    check("disabled delivery preserves unattempted alerts, reports status, and refuses undelivered contact messages");
     const view = { id: randomUUID(), path: `/articles/${article.slug}`, referrerHost: "google.com", device: "mobile" };
     await request("/analytics/pageviews", "POST", view); await request("/analytics/pageviews", "POST", view);
     assert.equal(await prisma.pageView.count(), 1);
@@ -109,6 +122,8 @@ async function main() {
     await prisma.pageView.create({ data: { ...view, id: randomUUID(), day: old, createdAt: old } });
     await prisma.interaction.create({ data: { kind: "contact", sourceId: "old", email: "old@example.com", createdAt: old } });
     await prisma.notificationJob.create({ data: { subscriberEmail: "old@example.com", signupAt: old, createdAt: old } });
+    await processNotifications(async () => { throw new Error("Must not send an alert outside 90-day retention"); });
+    assert.equal((await prisma.notificationJob.findFirst({ where: { subscriberEmail: "old@example.com" } }))!.attempts, 0);
     await cleanupHistory(); assert.equal(await prisma.pageView.count(), 1); assert.equal(await prisma.interaction.count(), 3);
     assert.equal(await prisma.notificationJob.count({ where: { subscriberEmail: "old@example.com" } }), 0);
     assert.equal(await prisma.subscriber.count(), 1); assert.equal(await prisma.comment.count(), 1); check("90-day retention removes history while preserving subscriptions and comments");

@@ -5,6 +5,7 @@ import { asyncHandler } from "../lib/asyncHandler";
 import { validate } from "../lib/validation";
 import { requireAuth } from "../middleware/requireAuth";
 import { limiter } from "../middleware/security";
+import { mailDeliveryEnabled } from "../lib/mailTransport";
 
 const router = Router();
 const viewSchema = z.object({
@@ -92,6 +93,6 @@ router.get("/subscribers", asyncHandler(async (req, res) => {
 router.get("/notifications", asyncHandler(async (_req, res) => {
   const items = await prisma.notificationJob.findMany({ where: { createdAt: { gte: since(90) } }, orderBy: { createdAt: "desc" }, take: 20,
     select: { id: true, subscriberEmail: true, status: true, attempts: true, signupAt: true, sentAt: true, lastError: true } });
-  res.json({ items });
+  res.json({ items, deliveryEnabled: mailDeliveryEnabled() });
 }));
 export default router;
