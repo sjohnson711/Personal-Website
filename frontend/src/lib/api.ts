@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-const API_BASE = (import.meta.env as any).VITE_API_URL || "/api";
+export const API_BASE = (import.meta.env as any).VITE_API_URL || "/api";
 
 interface FetchOptions extends RequestInit {
   headers?: Record<string, string>;
@@ -13,6 +13,7 @@ async function apiCall(
   const url = `${API_BASE}${path}`;
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
+    "X-Requested-With": "PersonalWebsite",
     ...options.headers,
   };
 
@@ -24,7 +25,7 @@ async function apiCall(
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}));
-    throw Object.assign(new Error(error.message || `API error: ${response.status}`), {
+    throw Object.assign(new Error(error.error || error.message || `API error: ${response.status}`), {
       status: response.status,
     });
   }

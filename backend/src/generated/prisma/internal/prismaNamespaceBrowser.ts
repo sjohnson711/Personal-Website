@@ -55,7 +55,10 @@ export const ModelName = {
   Comment: 'Comment',
   Admin: 'Admin',
   Subscriber: 'Subscriber',
-  EmbedCache: 'EmbedCache'
+  EmbedCache: 'EmbedCache',
+  PageView: 'PageView',
+  Interaction: 'Interaction',
+  NotificationJob: 'NotificationJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -132,6 +135,50 @@ export const EmbedCacheScalarFieldEnum = {
 } as const
 
 export type EmbedCacheScalarFieldEnum = (typeof EmbedCacheScalarFieldEnum)[keyof typeof EmbedCacheScalarFieldEnum]
+
+
+export const PageViewScalarFieldEnum = {
+  id: 'id',
+  path: 'path',
+  referrerHost: 'referrerHost',
+  device: 'device',
+  day: 'day',
+  createdAt: 'createdAt'
+} as const
+
+export type PageViewScalarFieldEnum = (typeof PageViewScalarFieldEnum)[keyof typeof PageViewScalarFieldEnum]
+
+
+export const InteractionScalarFieldEnum = {
+  id: 'id',
+  kind: 'kind',
+  sourceId: 'sourceId',
+  name: 'name',
+  email: 'email',
+  articleId: 'articleId',
+  createdAt: 'createdAt'
+} as const
+
+export type InteractionScalarFieldEnum = (typeof InteractionScalarFieldEnum)[keyof typeof InteractionScalarFieldEnum]
+
+
+export const NotificationJobScalarFieldEnum = {
+  id: 'id',
+  subscriberEmail: 'subscriberEmail',
+  signupAt: 'signupAt',
+  status: 'status',
+  attempts: 'attempts',
+  nextAttemptAt: 'nextAttemptAt',
+  firstAttemptAt: 'firstAttemptAt',
+  leaseUntil: 'leaseUntil',
+  sentAt: 'sentAt',
+  providerId: 'providerId',
+  lastError: 'lastError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type NotificationJobScalarFieldEnum = (typeof NotificationJobScalarFieldEnum)[keyof typeof NotificationJobScalarFieldEnum]
 
 
 export const SortOrder = {

@@ -64,3 +64,18 @@ export type Subscriber = Prisma.SubscriberModel
  * 
  */
 export type EmbedCache = Prisma.EmbedCacheModel
+/**
+ * Model PageView
+ * 
+ */
+export type PageView = Prisma.PageViewModel
+/**
+ * Model Interaction
+ * 
+ */
+export type Interaction = Prisma.InteractionModel
+/**
+ * Model NotificationJob
+ * 
+ */
+export type NotificationJob = Prisma.NotificationJobModel

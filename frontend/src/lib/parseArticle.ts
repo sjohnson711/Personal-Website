@@ -1,7 +1,28 @@
 import { Marked, type Token } from "marked";
+import DOMPurify from "dompurify";
+
+const rasterData = /^data:image\/(?:png|jpeg|gif|webp|avif);base64,[a-z0-9+/=]+$/i;
+export function sanitizeArticleHtml(html: string): string {
+  const clean = DOMPurify.sanitize(html, { USE_PROFILES: { html: true }, FORBID_TAGS: ["style", "form", "input", "button", "iframe"], FORBID_ATTR: ["style", "id", "name"] });
+  const doc = new DOMParser().parseFromString(clean, "text/html");
+  doc.querySelectorAll("a[href], img[src]").forEach((node) => {
+    const attr = node.tagName === "IMG" ? "src" : "href";
+    const value = node.getAttribute(attr) ?? "";
+    let allowed = attr === "src" && rasterData.test(value);
+    try {
+      const url = new URL(value, window.location.origin);
+      allowed ||= attr === "src" ? url.protocol === "https:" || (url.origin === window.location.origin && !value.startsWith("data:")) : ["https:", "http:", "mailto:"].includes(url.protocol);
+      if (url.username || url.password) allowed = false;
+    } catch { /* remove malformed URLs */ }
+    if (!allowed) node.removeAttribute(attr);
+    if (node.tagName === "IMG") { node.setAttribute("loading", "lazy"); node.setAttribute("decoding", "async"); }
+    if (node.tagName === "A") node.setAttribute("rel", "noopener noreferrer");
+  });
+  return doc.body.innerHTML;
+}
 
 // Dedicated marked instance with safety/a11y overrides:
-//   - escapes raw HTML in article bodies (defense-in-depth XSS guard)
+//   - removes raw HTML; sanitizes compiled HTML before rendering
 //   - downgrades markdown headings by one level so the page <h1> (article title)
 //     stays the sole h1 and screen-reader heading hierarchy isn't broken.
 // Shared by the article renderer and the segment parser so behavior is identical.
@@ -53,7 +74,7 @@ export function parseArticle(markdown: string): ArticleSegment[] {
     if (run.length === 0) return;
     const runTokens = run as Token[] & { links: Record<string, unknown> };
     runTokens.links = links;
-    segments.push({ kind: "html", html: articleMarked.parser(runTokens) });
+    segments.push({ kind: "html", html: sanitizeArticleHtml(articleMarked.parser(runTokens)) });
     run = [];
   };
 

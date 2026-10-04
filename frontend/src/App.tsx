@@ -10,19 +10,24 @@ import NotFoundPage from "./pages/NotFoundPage";
 import DashboardPage from "./pages/admin/DashboardPage";
 import NewArticlePage from "./pages/admin/NewArticlePage";
 import EditArticlePage from "./pages/admin/EditArticlePage";
+import AnalyticsPage from "./pages/admin/AnalyticsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import AnalyticsTracker from "./components/AnalyticsTracker";
 
 export default function App() {
   return (
-    <Routes>
+    <><AnalyticsTracker /><Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/articles" element={<ArticlesPage />} />
         <Route path="/articles/:slug" element={<ArticlePage />} />
         <Route path="/gateway" element={<GatewayPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
 
         <Route element={<ProtectedRoute />}>
           <Route path="/admin/dashboard" element={<DashboardPage />} />
+          <Route path="/admin/analytics" element={<AnalyticsPage />} />
           <Route path="/admin/articles/new" element={<NewArticlePage />} />
           <Route
             path="/admin/articles/:id/edit"
@@ -32,6 +37,6 @@ export default function App() {
 
         <Route path="*" element={<NotFoundPage />} />
       </Route>
-    </Routes>
+    </Routes></>
   );
 }

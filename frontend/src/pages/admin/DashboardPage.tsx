@@ -57,6 +57,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <Link to="/admin/analytics" className="btn-ghost">Site Analytics</Link>
           <Link to="/admin/articles/new" className="btn-primary"
                 style={isMobile ? { flex: 1, textAlign: "center" } : undefined}>+ New Article</Link>
         </div>

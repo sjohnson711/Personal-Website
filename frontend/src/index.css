@@ -1,6 +1,26 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
+.analytics-page { max-width: 1120px; margin: 0 auto; padding: 3rem 1rem; }
+.analytics-page h1, .analytics-page h2 { font-family: "Playfair Display", Georgia, serif; color: var(--color-navy); }
+.analytics-page h1 { font-size: 2rem; font-weight: 900; }
+.analytics-page h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: .75rem; }
+.analytics-page p { color: var(--color-slate); margin: .75rem 0 1.25rem; line-height: 1.7; }
+.analytics-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin: 1rem 0; }
+.analytics-toolbar select { display: inline-block; width: auto; margin-left: .5rem; }
+.analytics-stats, .analytics-breakdowns { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+.analytics-panel { padding: 1.5rem; margin: 1rem 0; min-width: 0; }
+.analytics-table-wrap { overflow-x: auto; }
+.analytics-page table { width: 100%; border-collapse: collapse; text-align: left; font-size: .9rem; }
+.analytics-page th, .analytics-page td { padding: .8rem; border-bottom: 1px solid #eae4d8; overflow-wrap: anywhere; }
+.analytics-page th { white-space: nowrap; }
+.analytics-page table { min-width: 440px; }
+.analytics-page th { background: var(--color-cream); }
+.analytics-counts { list-style: none; padding: 0; }
+.analytics-counts li { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem 0; overflow-wrap: anywhere; }
+.traffic-chart { display: flex; height: 160px; align-items: end; gap: 3px; padding: 1rem 0; border-bottom: 1px solid #eae4d8; margin-bottom: 1rem; }
+.traffic-chart > div { flex: 1; background: var(--color-gold-ink); border-radius: 3px 3px 0 0; min-width: 1px; }
+
 /* ─────────────────────────────────────────────────────────
    DESIGN TOKENS — Luxury Editorial
    Palette: Warm Cream · Deep Navy · Aged Gold · Charcoal

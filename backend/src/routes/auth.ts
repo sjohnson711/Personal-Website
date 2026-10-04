@@ -3,10 +3,12 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "../lib/prisma";
 import { requireAuth, AuthRequest } from "../middleware/requireAuth";
+import { asyncHandler } from "../lib/asyncHandler";
+import { loginSchema, validate } from "../lib/validation";
 
 const router = Router();
 
-router.post("/login", async (req: Request, res: Response): Promise<void> => {
+router.post("/login", validate(loginSchema), asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -42,7 +44,7 @@ router.post("/login", async (req: Request, res: Response): Promise<void> => {
   });
 
   res.json({ email: admin.email });
-});
+}));
 
 router.post("/logout", (_req: Request, res: Response): void => {
   const isProd = process.env.NODE_ENV === "production";

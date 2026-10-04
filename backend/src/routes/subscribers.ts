@@ -1,43 +1,33 @@
 import { Router, Request, Response } from "express";
 import { randomUUID } from "crypto";
 import { prisma } from "../lib/prisma";
+import { asyncHandler } from "../lib/asyncHandler";
+import { subscribeSchema, validate } from "../lib/validation";
+import { escapeHtml } from "../lib/mailTransport";
 
 const router = Router();
 
 // POST /api/subscribers
-router.post("/", async (req: Request, res: Response): Promise<void> => {
-  const { email } = req.body as { email?: string };
-
-  if (!email?.trim()) {
-    res.status(400).json({ error: "Email is required" });
-    return;
+router.post("/", validate(subscribeSchema), asyncHandler(async (req, res) => {
+  const email: string = req.body.email;
+  try {
+    await prisma.$transaction(async (tx) => {
+      const sub = await tx.subscriber.create({ data: { email, unsubscribeToken: randomUUID() } });
+      await tx.notificationJob.create({ data: { subscriberEmail: email, signupAt: sub.createdAt } });
+      await tx.interaction.create({ data: { kind: "subscription", sourceId: String(sub.id), email, createdAt: sub.createdAt } });
+    });
+  } catch (err) {
+    if (!(typeof err === "object" && err && "code" in err && err.code === "P2002")) throw err;
   }
-
-  const normalised = email.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalised)) {
-    res.status(400).json({ error: "Invalid email address" });
-    return;
-  }
-
-  const existing = await prisma.subscriber.findUnique({ where: { email: normalised } });
-  if (existing) {
-    // 200 so the form does not reveal whether an address is already registered
-    res.json({ message: "You're already subscribed!" });
-    return;
-  }
-
-  await prisma.subscriber.create({
-    data: { email: normalised, unsubscribeToken: randomUUID() },
-  });
-
-  res.status(201).json({ message: "Subscribed successfully!" });
-});
+  res.json({ message: "Your subscription is registered. Thank you!" });
+}));
 
 // GET /api/subscribers/unsubscribe/:token  (clicked from email footer)
 router.get(
   "/unsubscribe/:token",
-  async (req: Request<{ token: string }>, res: Response): Promise<void> => {
+  asyncHandler(async (req: Request<{ token: string }>, res: Response): Promise<void> => {
     const { token } = req.params;
+    if (!/^[0-9a-f-]{36}$/i.test(token)) { res.status(404).send("Unsubscribe link not found."); return; }
 
     const subscriber = await prisma.subscriber.findUnique({
       where: { unsubscribeToken: token },
@@ -53,9 +43,12 @@ router.get(
       return;
     }
 
-    await prisma.subscriber.delete({ where: { unsubscribeToken: token } });
+    await prisma.$transaction([
+      prisma.interaction.updateMany({ where: { kind: "subscription", sourceId: String(subscriber.id) }, data: { email: null } }),
+      prisma.subscriber.deleteMany({ where: { id: subscriber.id } }),
+    ]);
 
-    const siteUrl = process.env.SITE_URL ?? "http://localhost:5173";
+    const siteUrl = escapeHtml(process.env.SITE_URL ?? "http://localhost:5173");
     res.send(`
       <html><body style="font-family:sans-serif;text-align:center;padding:60px;background:#F7F4EF;">
         <h2 style="font-family:Georgia,serif;color:#0F1B35;">You've been unsubscribed.</h2>
@@ -63,7 +56,7 @@ router.get(
         <a href="${siteUrl}" style="color:#B8962E;">← Back to the site</a>
       </body></html>
     `);
-  },
+  }),
 );
 
 export default router;

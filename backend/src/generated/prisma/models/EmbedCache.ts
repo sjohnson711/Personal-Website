@@ -227,7 +227,7 @@ export type EmbedCacheGroupByOutputType = {
   _max: EmbedCacheMaxAggregateOutputType | null
 }
 
-type GetEmbedCacheGroupByPayload<T extends EmbedCacheGroupByArgs> = Prisma.PrismaPromise<
+export type GetEmbedCacheGroupByPayload<T extends EmbedCacheGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<EmbedCacheGroupByOutputType, T['by']> &
       {
@@ -1139,6 +1139,11 @@ export type EmbedCacheFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Skip the first `n` EmbedCaches.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of EmbedCaches.
+   */
   distinct?: Prisma.EmbedCacheScalarFieldEnum | Prisma.EmbedCacheScalarFieldEnum[]
 }
 

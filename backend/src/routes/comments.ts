@@ -1,6 +1,8 @@
 import { Router, Request, Response } from "express";
 import { prisma } from "../lib/prisma";
-import { requireAuth } from "../middleware/requireAuth";
+import { requireAuth, getOptionalAuth } from "../middleware/requireAuth";
+import { asyncHandler } from "../lib/asyncHandler";
+import { commentSchema, validate, positiveId } from "../lib/validation";
 
 const router = Router();
 
@@ -13,13 +15,15 @@ const profanityFilter = new Filter();
 // GET /api/comments/:articleId — list all comments for an article
 router.get(
   "/:articleId",
-  async (req: Request<{ articleId: string }>, res: Response): Promise<void> => {
-    const articleId = parseInt(req.params.articleId, 10);
-    if (isNaN(articleId)) {
+  asyncHandler(async (req: Request<{ articleId: string }>, res: Response): Promise<void> => {
+    const articleId = positiveId(req.params.articleId);
+    if (!articleId) {
       res.status(400).json({ error: "Invalid article ID" });
       return;
     }
 
+    const article = await prisma.article.findUnique({ where: { id: articleId } });
+    if (!article || (!article.published && !getOptionalAuth(req))) { res.status(404).json({ error: "Article not found" }); return; }
     const comments = await prisma.comment.findMany({
       where: { articleId },
       orderBy: { createdAt: "asc" },
@@ -27,20 +31,21 @@ router.get(
     });
 
     res.json({ comments });
-  },
+  }),
 );
 
 // POST /api/comments/:articleId — submit a new comment
 router.post(
   "/:articleId",
-  async (req: Request<{ articleId: string }>, res: Response): Promise<void> => {
-    const articleId = parseInt(req.params.articleId, 10);
-    if (isNaN(articleId)) {
+  validate(commentSchema),
+  asyncHandler(async (req: Request<{ articleId: string }>, res: Response): Promise<void> => {
+    const articleId = positiveId(req.params.articleId);
+    if (!articleId) {
       res.status(400).json({ error: "Invalid article ID" });
       return;
     }
 
-    const { name, body } = req.body as { name?: string; body?: string };
+    const { name, body } = req.body as { name: string; body: string };
 
     if (!name?.trim() || !body?.trim()) {
       res.status(400).json({ error: "Name and message are required" });
@@ -75,22 +80,25 @@ router.post(
       return;
     }
 
-    const comment = await prisma.comment.create({
+    const comment = await prisma.$transaction(async (tx) => {
+      const created = await tx.comment.create({
       data: { articleId, name: name.trim(), body: body.trim() },
       select: { id: true, name: true, body: true, createdAt: true },
+      });
+      await tx.interaction.create({ data: { kind: "comment", sourceId: String(created.id), name, articleId, createdAt: created.createdAt } });
+      return created;
     });
-
     res.status(201).json(comment);
-  },
+  }),
 );
 
 // DELETE /api/comments/:id — admin-only, remove a single comment
 router.delete(
   "/:id",
   requireAuth,
-  async (req: Request<{ id: string }>, res: Response): Promise<void> => {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
+  asyncHandler(async (req: Request<{ id: string }>, res: Response): Promise<void> => {
+    const id = positiveId(req.params.id);
+    if (!id) {
       res.status(400).json({ error: "Invalid comment ID" });
       return;
     }
@@ -101,9 +109,12 @@ router.delete(
       return;
     }
 
-    await prisma.comment.delete({ where: { id } });
+    await prisma.$transaction([
+      prisma.interaction.deleteMany({ where: { kind: "comment", sourceId: String(id) } }),
+      prisma.comment.delete({ where: { id } }),
+    ]);
     res.json({ success: true });
-  },
+  }),
 );
 
 export default router;

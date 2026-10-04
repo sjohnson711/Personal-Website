@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 import { useIsMobile } from "../lib/useMediaQuery";
 
@@ -20,6 +20,7 @@ export default function Layout() {
           marginTop: isMobile ? "2.5rem" : "5rem",
         }}
       >
+        <div style={{ maxWidth: "1100px", margin: "0 auto 1rem" }}><Link to="/privacy" style={{ color: "var(--color-gold-ink)" }}>Privacy and site activity</Link></div>
         <div
           style={{
             maxWidth: "1100px",

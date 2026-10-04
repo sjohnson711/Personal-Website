@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, type ClipboardEvent as ReactClipboardEvent } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateSlug } from "../lib/slug";
 import { api } from "../lib/api";
 import { useIsMobile } from "../lib/useMediaQuery";
+import { useImagePaste, MAX_ARTICLE_BYTES } from "../lib/imagePaste";
 
 interface ArticleEditorProps {
   mode: "new" | "edit";
@@ -21,45 +22,14 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
   const [error, setError] = useState("");
   const isMobile = useIsMobile();
   const contentRef = useRef<HTMLTextAreaElement>(null);
+  const { paste: handleContentPaste, pending } = useImagePaste(contentRef, content, setContent, setError);
 
   useEffect(() => { if (!slugEdited) setSlug(generateSlug(title)); }, [title, slugEdited]);
 
-  // Medium-style image paste: dropping an image onto the Content field embeds it
-  // inline as a base64 data URI (no upload server needed). Pasting text/URLs is
-  // untouched — we only intercept when the clipboard actually carries an image.
-  function handleContentPaste(e: ReactClipboardEvent<HTMLTextAreaElement>) {
-    const file = Array.from(e.clipboardData.items)
-      .find((it) => it.kind === "file" && it.type.startsWith("image/"))
-      ?.getAsFile();
-    if (!file) return; // let the normal text/URL paste proceed
-
-    e.preventDefault();
-    const textarea = e.currentTarget;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUri = String(reader.result);
-      const snippet = `\n\n![](${dataUri})\n\n`;
-      setContent((prev) => prev.slice(0, start) + snippet + prev.slice(end));
-      // ~1.4MB of base64 ≈ a 1MB image; warn but still allow it.
-      if (dataUri.length > 1_500_000) {
-        setError("Heads up: that image is large and will bloat the article. Consider pasting a hosted image URL instead.");
-      }
-      // Restore the caret just after the inserted snippet on the next frame,
-      // once React has flushed the new value into the textarea.
-      requestAnimationFrame(() => {
-        const pos = start + snippet.length;
-        contentRef.current?.setSelectionRange(pos, pos);
-        contentRef.current?.focus();
-      });
-    };
-    reader.readAsDataURL(file);
-  }
-
   async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
+    if (pending) { setError("Wait for the image to finish processing."); return; }
+    if (new TextEncoder().encode(JSON.stringify({ title, slug, excerpt, content, published })).length > MAX_ARTICLE_BYTES) { setError("This article exceeds 8 MB. Remove an image or use HTTPS image links."); return; }
     setSaving(true);
     setError("");
     try {
@@ -102,6 +72,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
         <label htmlFor="article-title" className="field-label">Title</label>
         <input
           id="article-title"
+          maxLength={300}
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -117,6 +88,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
         <label htmlFor="article-slug" className="field-label">URL Slug</label>
         <input
           id="article-slug"
+          maxLength={160}
           type="text"
           value={slug}
           onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
@@ -135,6 +107,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
         <label htmlFor="article-excerpt" className="field-label">Excerpt</label>
         <textarea
           id="article-excerpt"
+          maxLength={2000}
           value={excerpt}
           onChange={(e) => setExcerpt(e.target.value)}
           required
@@ -148,7 +121,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
       <div>
         <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.42rem" }}>
           <label htmlFor="article-content" className="field-label" style={{ marginBottom: 0 }}>Content</label>
-          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem" }}>Markdown supported · paste an image to embed it · a link on its own line becomes a rich embed</span>
+          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem" }}>Markdown supported · paste images or HTTPS image links at the cursor · 2 MB per image</span>
         </div>
         <textarea
           ref={contentRef}
@@ -167,7 +140,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
                    lineHeight: 1.65 }}
         />
         <p id="article-content-count" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem", marginTop: "0.35rem", textAlign: "right" }}>
-          {content.length.toLocaleString()} characters
+          {pending > 0 ? `Processing ${pending} image(s)… ` : ""}{content.length.toLocaleString()} characters · Edit ![description] for image alt text
         </p>
       </div>
 
@@ -202,7 +175,7 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
       </label>
 
       <div style={{ display: "flex", gap: "0.75rem", paddingTop: "0.25rem", flexWrap: "wrap" }}>
-        <button type="submit" disabled={saving} className="btn-primary"
+        <button type="submit" disabled={saving || pending > 0} className="btn-primary"
                 style={isMobile ? { flex: 1 } : undefined}>
           {saving ? "Saving…" : mode === "new" ? "Publish Article" : "Save Changes"}
         </button>

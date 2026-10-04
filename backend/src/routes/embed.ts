@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import { prisma } from "../lib/prisma";
 import { resolveEmbed, normalizeUrl, EmbedError, EmbedResult } from "../lib/embed";
+import { asyncHandler } from "../lib/asyncHandler";
 
 const router = Router();
 
@@ -42,7 +43,7 @@ function toResult(row: {
 }
 
 // GET /api/embed?url=...
-router.get("/", async (req: Request, res: Response): Promise<void> => {
+router.get("/", asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const raw = Array.isArray(req.query.url) ? req.query.url[0] : req.query.url;
   if (typeof raw !== "string" || raw.length === 0 || raw.length > MAX_URL_LENGTH) {
     res.status(400).json({ error: "Invalid or missing url" });
@@ -116,6 +117,6 @@ router.get("/", async (req: Request, res: Response): Promise<void> => {
     // Unexpected error — don't break the reader's page.
     res.status(502).json({ error: "Failed to resolve embed" });
   }
-});
+}));
 
 export default router;
