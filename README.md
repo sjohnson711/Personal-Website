@@ -332,7 +332,6 @@ DATABASE_URL="<neon-url>" ADMIN_PASSWORD="<pwd>" npx tsx prisma/seed.ts
 - [ ] About page displays author bio
 - [ ] Newsletter signup sends email
 - [ ] Contact form sends email
-- [ ] Admin login works at `/gateway`
 - [ ] Can create/edit/delete articles
 - [ ] Slug auto-generation works
 - [ ] Comments display on published articles
@@ -438,4 +437,4 @@ MIT — Feel free to use as template or reference for interviews.
 
 ---
 
-**Status:** ✅ Production-Ready | **Last Updated:** May 2026 
+**Status:** ✅ Production-Ready | **Last Updated:** October 2026
