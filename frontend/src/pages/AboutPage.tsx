@@ -30,10 +30,11 @@ export default function AboutPage() {
             Born and raised in Georgia, Seth Johnson has spent over a decade in human services, with a passion for educating children from underserved communities.
           </p>
           <p>
-            His work includes serving as Residential Program Director at Landmark for Families in Charleston, South Carolina. With a master's in Clinical Mental Health Counseling and a decade of community work, his transition to technology was an expansion of that mission.
+            His work includes serving as a former Residential Program Director at Landmark for Families in Charleston, South Carolina. With a master's in Clinical Mental Health Counseling and a decade of community work, his transition to technology was an expansion of that mission.
           </p>
           <p>
-            A Code The Dream full-stack graduate with CodePath training in AI Applied Engineering and Technical Interviewing, Seth brings React and Node.js expertise to his commitment to equity. Today, as a CodePath Tech Fellow and Code The Dream mentor, he uses technology to expand opportunity.
+            A Code The Dream full-stack graduate with CodePath training in AI Applied Engineering and Technical Interviewing, Seth brings a AI-Forward expertise to his commitment to equity. Today, he works as a Security Software Engineer with the intentions of creating a safe place for users to keep their data safe. He continues to encourage others that if you have faith in the Lord you can accomplish anything. 
+
           </p>
           <div className="about-connect" aria-label="Connect with Seth">
             <a href="https://www.linkedin.com/in/seth-johnson-10a6a217b/" target="_blank" rel="noopener noreferrer" className="about-connect-link">
