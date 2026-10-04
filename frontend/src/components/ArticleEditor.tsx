@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { generateSlug } from "../lib/slug";
 import { api } from "../lib/api";
 import { useIsMobile } from "../lib/useMediaQuery";
-import { useImagePaste, MAX_ARTICLE_BYTES } from "../lib/imagePaste";
+import { MAX_ARTICLE_BYTES } from "../lib/imagePaste";
+const RichTextEditor = lazy(() => import("./RichTextEditor"));
 
 interface ArticleEditorProps {
   mode: "new" | "edit";
@@ -21,15 +22,15 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const isMobile = useIsMobile();
-  const contentRef = useRef<HTMLTextAreaElement>(null);
-  const { paste: handleContentPaste, pending } = useImagePaste(contentRef, content, setContent, setError);
+  const [pending, setPending] = useState(0);
 
   useEffect(() => { if (!slugEdited) setSlug(generateSlug(title)); }, [title, slugEdited]);
 
   async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
     if (pending) { setError("Wait for the image to finish processing."); return; }
-    if (new TextEncoder().encode(JSON.stringify({ title, slug, excerpt, content, published })).length > MAX_ARTICLE_BYTES) { setError("This article exceeds 8 MB. Remove an image or use HTTPS image links."); return; }
+    if (!content.trim()) { setError("Add some content to your article."); return; }
+    if (new TextEncoder().encode(JSON.stringify({ title, slug, excerpt, content, published })).length > MAX_ARTICLE_BYTES) { setError("This article exceeds 32 MB. Remove an image or use HTTPS image links."); return; }
     setSaving(true);
     setError("");
     try {
@@ -119,29 +120,11 @@ export default function ArticleEditor({ mode, initialData }: ArticleEditorProps)
       </div>
 
       <div>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: "0.42rem" }}>
-          <label htmlFor="article-content" className="field-label" style={{ marginBottom: 0 }}>Content</label>
-          <span id="article-content-format" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem" }}>Markdown supported · paste images or HTTPS image links at the cursor · 2 MB per image</span>
-        </div>
-        <textarea
-          ref={contentRef}
-          id="article-content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onPaste={handleContentPaste}
-          required
-          aria-required="true"
-          aria-describedby="article-content-format article-content-count"
-          rows={isMobile ? 12 : 22}
-          placeholder={"## Introduction\n\nWrite your article here…\n\n## Section Two\n\nSupports **bold**, *italic*, `code`, and [links](https://example.com)."}
-          className="field-input"
-          style={{ fontFamily: '"DM Mono", ui-monospace, monospace',
-                   fontSize: isMobile ? "0.85rem" : "0.87rem",
-                   lineHeight: 1.65 }}
-        />
-        <p id="article-content-count" style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.7rem", marginTop: "0.35rem", textAlign: "right" }}>
-          {pending > 0 ? `Processing ${pending} image(s)… ` : ""}{content.length.toLocaleString()} characters · Edit ![description] for image alt text
-        </p>
+        <label id="article-content-label" htmlFor="article-content" className="field-label">Content</label>
+        <Suspense fallback={<div role="status">Loading editor...</div>}>
+          <RichTextEditor initialContent={initialData?.content ?? ""} onChange={setContent}
+            onPendingChange={setPending} onError={setError} disabled={saving} />
+        </Suspense>
       </div>
 
       {/* Publish toggle. Explicit htmlFor + id pair (instead of relying on the

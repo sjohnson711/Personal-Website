@@ -25,7 +25,7 @@ export function createApp() {
   app.use(cookieParser());
   app.use(csrfProtection);
   app.use("/api/articles", (req, res, next) => {
-    if (req.method === "POST" || req.method === "PUT") return requireAuth(req, res, () => express.json({ limit: "8mb" })(req, res, next));
+    if (req.method === "POST" || req.method === "PUT") return requireAuth(req, res, () => express.json({ limit: "32mb" })(req, res, next));
     next();
   });
   app.use(express.json({ limit: "16kb" }));
@@ -42,7 +42,7 @@ export function createApp() {
   app.use("/api/analytics", analyticsRouter);
   const errors: ErrorRequestHandler = (err, _req, res, _next) => {
     if (res.headersSent) return;
-    if (err.type === "entity.too.large") { res.status(413).json({ error: "Request is too large. Articles allow up to 8 MB; forms allow 16 KB." }); return; }
+    if (err.type === "entity.too.large") { res.status(413).json({ error: "Request is too large. Articles allow up to 32 MB; forms allow 16 KB." }); return; }
     if (err.type === "entity.parse.failed") { res.status(400).json({ error: "Invalid JSON" }); return; }
     if (err.code === "P2002") { res.status(409).json({ error: "That record already exists" }); return; }
     console.error("[api]", err.code ?? err.name ?? "Unexpected error");

@@ -1,91 +1,86 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { randomUUID } from "node:crypto";
-import ArticleEditor from "../src/components/ArticleEditor";
 import AnalyticsPage from "../src/pages/admin/AnalyticsPage";
-import { parseArticle, sanitizeArticleHtml } from "../src/lib/parseArticle";
+import { articleEditorHtml, parseArticle, sanitizeArticleHtml, serializeRichText } from "../src/lib/parseArticle";
 import { directImageUrl } from "../src/lib/imagePaste";
 import { api } from "../src/lib/api";
 
 jest.mock("../src/lib/api", () => ({ api: { get: jest.fn(), post: jest.fn(), put: jest.fn() } }));
-const originalReader = window.FileReader;
-class Reader {
-  static all: Reader[] = [];
-  result: string | null = null;
-  onload: (() => void) | null = null;
-  onerror: (() => void) | null = null;
-  readAsDataURL() { Reader.all.push(this); }
-  abort() {}
-  complete() { this.result = "data:image/png;base64,YQ=="; this.onload?.(); }
-}
-beforeEach(() => {
-  jest.clearAllMocks(); Reader.all = [];
-  Object.defineProperty(window.crypto, "randomUUID", { configurable: true, value: randomUUID });
-  Object.defineProperty(window, "FileReader", { configurable: true, value: Reader });
+
+test("legacy Markdown opens with formatted headings, links and inline images", () => {
+  const markdown = "## Heading\n\n**Before**\n\n![Description](data:image/png;base64,YQ==)\n\nAfter\n\nhttps://example.com/video";
+  const html = articleEditorHtml(markdown);
+  expect(html).toContain("<h3>Heading</h3>");
+  expect(html).toContain("<strong>Before</strong>");
+  expect(html.indexOf("Before")).toBeLessThan(html.indexOf("<img"));
+  expect(html.indexOf("<img")).toBeLessThan(html.indexOf("After"));
+  expect(html).toContain('alt="Description"');
+  expect(html).toContain("https://example.com/video");
 });
-afterAll(() => { Object.defineProperty(window, "FileReader", { configurable: true, value: originalReader }); });
-function editor(content = "Before\n\nAfter") {
-  render(<MemoryRouter><ArticleEditor mode="edit" initialData={{ id: 1, title: "Test", slug: "test", excerpt: "Excerpt", content, published: false }} /></MemoryRouter>);
-  const area = screen.getByLabelText("Content") as HTMLTextAreaElement;
-  area.focus(); return area;
-}
-function paste(area: HTMLTextAreaElement, type = "image/png", size = 1) {
-  const file = new File([new Uint8Array(size)], "image", { type });
-  fireEvent.paste(area, { clipboardData: { items: [{ kind: "file", type, getAsFile: () => file }], getData: () => "" } });
-}
-test.each([0, 6, 13])("image stays at cursor offset %i and saves in place", async (position) => {
-  const area = editor(); area.setSelectionRange(position, position);
-  paste(area); expect(screen.getByRole("button", { name: "Save Changes" })).toBeDisabled();
-  act(() => Reader.all[0].complete());
-  const expected = "Before\n\nAfter".slice(0, position) + "\n\n![](data:image/png;base64,YQ==)\n\n" + "Before\n\nAfter".slice(position);
-  expect(area.value).toBe(expected);
-  fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
-  await waitFor(() => expect(api.put).toHaveBeenCalledWith("/articles/1", expect.objectContaining({ content: expected })));
+
+test("saved rich text reopens with color, size, alignment, image size and alt text", () => {
+  const html = '<h2>Heading</h2><p style="text-align: center"><strong><span style="color: #b91c1c; font-size: 20px">Before</span></strong></p><img src="data:image/png;base64,YQ==" width="50%" alt="Description"><p>After</p>';
+  const saved = serializeRichText(html);
+  expect(JSON.parse(saved).format).toBe("richtext-v1");
+  const reopened = articleEditorHtml(saved);
+  expect(reopened).toContain("rgb(185, 28, 28)");
+  expect(reopened).toContain("font-size: 20px");
+  expect(reopened).toContain("text-align: center");
+  expect(reopened).toContain('width="50%"');
+  expect(reopened).toContain('alt="Description"');
+  expect(parseArticle(saved)).toEqual([{ kind: "html", html: reopened }]);
 });
-test("an asynchronous paste follows edits before its anchor instead of jumping to an old offset", () => {
-  const area = editor(); area.setSelectionRange(6, 6); paste(area);
-  fireEvent.change(area, { target: { value: "New introduction\n" + area.value } });
-  act(() => Reader.all[0].complete());
-  expect(area.value).toMatch(/^New introduction\nBefore\n\n!\[\]\(data:image\/png/);
-  expect(area.value).toContain("After");
+
+test("rich text retains bare URL embeds between formatted paragraphs", () => {
+  const saved = serializeRichText('<p>Before</p><p><a href="https://example.com/video">https://example.com/video</a></p><p>After</p>');
+  expect(parseArticle(saved)).toEqual([
+    { kind: "html", html: "<p>Before</p>" },
+    { kind: "embed", url: "https://example.com/video" },
+    { kind: "html", html: "<p>After</p>" },
+  ]);
+  expect(parseArticle(serializeRichText('<p><a href="https://example.com/video">Watch video</a></p>'))[0].kind).toBe("html");
 });
-test("failed image processing restores selected text", () => {
-  const area = editor(); area.setSelectionRange(0, 6); paste(area);
-  act(() => Reader.all[0].onerror?.());
-  expect(area.value).toBe("Before\n\nAfter");
-  expect(screen.getByRole("alert")).toHaveTextContent("could not be read");
+
+test("rich text sanitization drops CSS overlays and executable content while keeping editor formatting", () => {
+  const html = sanitizeArticleHtml('<p style="text-align:right;position:fixed;inset:0;background:url(https://evil.test)"><span style="color:#256342;font-size:20px;display:none">Safe</span></p><img src="https://example.com/photo.png" width="50000" height="9999" onerror="alert(1)" data-paste-id="bad"><script>alert(1)</script><iframe src="https://evil.test"></iframe>', true);
+  expect(html).toContain("text-align: right");
+  expect(html).toContain("rgb(37, 99, 66)");
+  expect(html).toContain("font-size: 20px");
+  expect(html).not.toMatch(/position|inset|background|display|onerror|data-paste|50000|9999|<script|<iframe/);
 });
-test("multiple image reads may complete out of order without reordering the article", () => {
-  const area = editor(); area.setSelectionRange(0, 0); paste(area);
-  area.setSelectionRange(area.value.length, area.value.length); paste(area);
-  act(() => Reader.all[1].complete()); act(() => Reader.all[0].complete());
-  expect(area.value).toBe("\n\n![](data:image/png;base64,YQ==)\n\nBefore\n\nAfter\n\n![](data:image/png;base64,YQ==)\n\n");
+
+test("encoded text remains escaped when rendering a rich article", () => {
+  const segments = parseArticle(serializeRichText('&lt;img src=x onerror=alert(1)&gt;<p>Text</p>'));
+  const html = segments.filter((s) => s.kind === "html").map((s) => s.html).join("");
+  expect(html).toContain("&lt;img");
+  expect(html).not.toContain("<img");
 });
-test.each([["image/svg+xml", 1], ["image/png", 2 * 1024 * 1024 + 1]])("rejects unsupported/oversized image %s", (type, size) => {
-  const area = editor(); paste(area, type as string, size as number);
-  expect(area.value).toBe("Before\n\nAfter"); expect(screen.getByRole("alert")).toBeInTheDocument(); expect(Reader.all).toHaveLength(0);
+
+test("ordinary JSON and malformed JSON article content remain legacy text", () => {
+  expect(articleEditorHtml('{"title":"An article"}')).toContain("An article");
+  expect(articleEditorHtml('{"format":"richtext-v1"')).toContain("richtext-v1");
 });
-test("direct HTTPS image URLs replace the selected text, ordinary links are untouched", () => {
-  const area = editor(); area.setSelectionRange(0, 6);
-  fireEvent.paste(area, { clipboardData: { items: [], getData: () => "https://example.com/photo.png?size=2" } });
-  expect(area.value).toContain("![](<https://example.com/photo.png?size=2>)");
-  expect(directImageUrl("https://example.com/article")).toBeNull();
-  expect(directImageUrl("http://example.com/photo.png")).toBeNull();
-  expect(directImageUrl("https://example.com/unsafe.svg")).toBeNull();
+
+test("direct image URLs require HTTPS raster images without credentials", () => {
+  expect(directImageUrl("https://example.com/photo.png?size=2")).toBe("https://example.com/photo.png?size=2");
+  for (const url of ["https://example.com/article", "http://example.com/photo.png", "https://example.com/unsafe.svg", "https://user:password@example.com/photo.png"]) expect(directImageUrl(url)).toBeNull();
 });
-test("a reopened article renders its text and image in the saved order", () => {
+
+test("legacy article rendering preserves text and image order", () => {
   const segments = parseArticle("Before\n\n![](data:image/png;base64,YQ==)\n\nAfter");
   const html = segments.filter((s) => s.kind === "html").map((s) => s.html).join("");
   expect(html.indexOf("Before")).toBeLessThan(html.indexOf("<img"));
   expect(html.indexOf("<img")).toBeLessThan(html.indexOf("After"));
 });
-test("sanitization blocks script/event handlers, unsafe links, SVG and iframe injection", () => {
-  const html = sanitizeArticleHtml('<script>alert(1)</script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">bad</a><img src="data:image/svg+xml;base64,PHN2Zz4="><iframe src="https://evil.example"></iframe><form><input name="cookie"></form>');
+
+test.each([false, true])("sanitization blocks scripts, unsafe URLs, SVG and iframe injection (rich=%s)", (rich) => {
+  const html = sanitizeArticleHtml('<script>alert(1)</script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">bad</a><img src="data:image/svg+xml;base64,PHN2Zz4="><iframe src="https://evil.example"></iframe><form><input name="cookie"></form>', rich);
   expect(html).not.toMatch(/<script|onerror|javascript:|data:image\/svg|<iframe|<form|<input/);
   const markdown = parseArticle("[bad](javascript:alert(1))\n\n<script>alert(1)</script>\n\n![ok](https://example.com/photo.png)");
   const clean = markdown.filter((s) => s.kind === "html").map((s) => s.html).join("");
   expect(clean).not.toContain("javascript:"); expect(clean).not.toContain("<script"); expect(clean).toContain("https://example.com/photo.png");
 });
+
 test("analytics shows an accessible empty state and retries failures", async () => {
   const get = jest.mocked(api.get); get.mockRejectedValue(new Error("offline"));
   render(<MemoryRouter><AnalyticsPage /></MemoryRouter>);

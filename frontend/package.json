@@ -7,10 +7,18 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "preview:local": "node scripts/local-preview.mjs",
+    "preview:editor": "node scripts/preview-editor.mjs",
     "review:local": "node scripts/review-full.mjs",
     "test": "jest --config jest.config.cjs"
   },
   "dependencies": {
+    "@tiptap/extension-image": "^3.31.4",
+    "@tiptap/extension-table": "^3.31.4",
+    "@tiptap/extension-text-align": "^3.31.4",
+    "@tiptap/extension-text-style": "^3.31.4",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/react": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
     "dompurify": "^3.4.16",
     "lucide-react": "^1.16.0",
     "marked": "^17.0.3",

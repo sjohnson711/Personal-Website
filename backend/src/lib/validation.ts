@@ -6,7 +6,7 @@ export const articleSchema = z.object({
   title: z.string().trim().min(1).max(300),
   slug: z.string().min(1).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Use lowercase letters, numbers, and hyphens for the slug").refine((v) => !/^\d+$/.test(v), "The slug must include a letter or hyphen so it cannot be confused with an article ID"),
   excerpt: z.string().trim().min(1).max(2000),
-  content: z.string().min(1).refine((v) => v.trim().length > 0).refine((v) => Buffer.byteLength(v) <= 8 * 1024 * 1024, "Article exceeds the 8 MB limit"),
+  content: z.string().min(1).refine((v) => v.trim().length > 0).refine((v) => Buffer.byteLength(v) <= 32 * 1024 * 1024, "Article exceeds the 32 MB limit"),
   published: z.boolean().optional(),
 }).strict();
 export const subscribeSchema = z.object({ email: emailSchema }).strict();

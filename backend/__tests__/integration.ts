@@ -127,11 +127,11 @@ async function main() {
     await cleanupHistory(); assert.equal(await prisma.pageView.count(), 1); assert.equal(await prisma.interaction.count(), 3);
     assert.equal(await prisma.notificationJob.count({ where: { subscriberEmail: "old@example.com" } }), 0);
     assert.equal(await prisma.subscriber.count(), 1); assert.equal(await prisma.comment.count(), 1); check("90-day retention removes history while preserving subscriptions and comments");
-    const large = { title: "Image test", slug: "image-test", excerpt: "Test", content: "Before\n\n![](data:image/png;base64," + "YQ==".repeat(50_000) + ")\n\nAfter", published: false };
+    const large = { title: "Image test", slug: "image-test", excerpt: "Test", content: "Before\n\n![](data:image/png;base64," + "YQ==".repeat(3 * 1024 * 1024) + ")\n\nAfter", published: false };
     const saved = await request("/articles", "POST", large, true); assert.equal(saved.status, 201);
     const savedArticle = await saved.json() as any;
     const reopened = await (await request(`/articles/${savedArticle.id}`, "GET", undefined, true)).json() as any;
-    assert.equal(reopened.content, large.content); check("image articles above the former 100 KB limit save/reopen without reordering");
+    assert.equal(reopened.content, large.content); check("image articles above the former 8 MB limit save/reopen without reordering");
     assert.equal((await request("/articles", "POST", large)).status, 401);
     assert.equal((await request("/articles", "POST", { ...large, slug: "123" }, true)).status, 400); check("large writes authenticate before parsing; numeric-only slug collisions prevented");
     assert.equal((await request(`/articles/${savedArticle.id}`, "DELETE", undefined, true)).status, 200);
@@ -144,7 +144,7 @@ async function main() {
       assert.equal(embed.status, 200); assert.equal((await embed.json() as any).provider, provider);
     }
     check("existing YouTube, Vimeo, and Spotify provider embeds remain available");
-    assert.equal((await request("/articles", "POST", { ...large, slug: "oversized", content: "x".repeat(8 * 1024 * 1024) }, true)).status, 413);
+    assert.equal((await request("/articles", "POST", { ...large, slug: "oversized", content: "x".repeat(32 * 1024 * 1024) }, true)).status, 413);
     assert.equal((await request("/contact", "POST", { name: "name", email: "a@b.com", message: "x".repeat(20_000) })).status, 413); check("article and public-form request size limits");
     let rate = 200;
     for (let i = 0; i < 12; i++) rate = (await request("/auth/login", "POST", { email: "none@example.com", password: "wrong" })).status;

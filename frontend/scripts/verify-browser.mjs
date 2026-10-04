@@ -37,29 +37,41 @@ try {
   await page.goto(`${base}/admin/articles/${article.id}/edit`);
   const area = page.getByLabel("Content", { exact: true });
   await area.waitFor(); await area.focus();
-  const original = await area.inputValue();
+  const original = article.content;
   const token = (await page.context().cookies()).find((c) => c.name === "token")?.value;
   restore = { article, token, content: original };
-  const offset = original.indexOf("## After the image");
-  await area.evaluate((element, { png, offset }) => {
-    element.setSelectionRange(offset, offset);
+  await area.evaluate((element) => {
+    const after = Array.from(element.children).find((node) => node.textContent.includes("After the image"));
+    const range = document.createRange(); range.selectNodeContents(after); range.collapse(true);
+    const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+  });
+  await page.waitForTimeout(60);
+  await area.evaluate((element, { png }) => {
     const bytes = Uint8Array.from(atob(png), (c) => c.charCodeAt(0));
     const data = new DataTransfer(); data.items.add(new File([bytes], "test.png", { type: "image/png" }));
     element.dispatchEvent(new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: data }));
-  }, { png, offset });
-  await page.waitForFunction(() => !document.querySelector("#article-content").value.includes("[Processing image"));
-  const pasted = await area.inputValue();
-  assert.equal(pasted, original.slice(0, offset) + `\n\n![](data:image/png;base64,${png})\n\n` + original.slice(offset));
+  }, { png });
+  await page.waitForFunction(() => document.querySelector("#article-content img[src^='data:image/png']")?.naturalWidth > 0);
+  const pasted = await area.innerHTML();
+  assert.ok(pasted.includes(`data:image/png;base64,${png}`));
+  assert.ok(pasted.indexOf(`<img`) < pasted.indexOf("After the image"));
   await area.evaluate((element) => {
-    element.setSelectionRange(element.value.length, element.value.length);
+    const range = document.createRange(); range.selectNodeContents(element); range.collapse(false);
+    const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range);
+    document.dispatchEvent(new Event("selectionchange"));
+  });
+  await page.waitForTimeout(60);
+  await area.evaluate((element) => {
     const data = new DataTransfer(); data.setData("text/plain", "https://images.example.test/photo.png");
     element.dispatchEvent(new ClipboardEvent("paste", { bubbles: true, cancelable: true, clipboardData: data }));
   });
-  const saved = await area.inputValue(); assert.ok(saved.endsWith("![](<https://images.example.test/photo.png>)\n\n"));
+  assert.ok((await area.innerHTML()).includes("https://images.example.test/photo.png"));
+  const imageCount = await area.locator("img[src]").count();
   await page.getByRole("button", { name: "Save Changes", exact: true }).click(); await page.waitForURL("**/admin/dashboard");
-  await page.goto(`${base}/admin/articles/${article.id}/edit`); await area.waitFor(); assert.equal(await area.inputValue(), saved);
+  await page.goto(`${base}/admin/articles/${article.id}/edit`); await area.waitFor(); assert.equal(await area.locator("img[src]").count(), imageCount);
   await page.goto(base + "/articles/local-image-test"); await page.locator(".prose-ink img").first().waitFor();
-  assert.equal(await page.locator(".prose-ink img").count(), (saved.match(/!\[[^\]]*\]/g) ?? []).length);
+  assert.equal(await page.locator(".prose-ink img").count(), imageCount);
   for (const img of await page.locator(".prose-ink img").all()) await img.scrollIntoViewIfNeeded();
   await page.waitForFunction(() => Array.from(document.querySelectorAll(".prose-ink img")).every((img) => img.complete && img.naturalWidth > 0));
   await page.screenshot({ path: resolve(output, "article-mobile.png"), fullPage: true });

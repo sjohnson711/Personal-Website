@@ -15,9 +15,6 @@ export default function NewArticlePage() {
         <h1 style={{ fontFamily: '"Playfair Display", Georgia, serif',
                      fontSize: "clamp(1.55rem, 6vw, 2.2rem)",
                      fontWeight: 900, color: "var(--color-navy)", margin: 0, letterSpacing: "-0.02em" }}>New Article</h1>
-        <p style={{ fontFamily: '"DM Sans", sans-serif', color: "var(--color-slate)", fontSize: "0.85rem", margin: "0.5rem 0 0" }}>
-          Write your post below. Full Markdown supported — headings, bold, italic, blockquotes, and code.
-        </p>
       </div>
 
       <div style={{ background: "#FFFFFF", border: "1px solid #EAE4D8", borderRadius: "0.875rem",

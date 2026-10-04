@@ -2,9 +2,26 @@ import { Marked, type Token } from "marked";
 import DOMPurify from "dompurify";
 
 const rasterData = /^data:image\/(?:png|jpeg|gif|webp|avif);base64,[a-z0-9+/=]+$/i;
-export function sanitizeArticleHtml(html: string): string {
-  const clean = DOMPurify.sanitize(html, { USE_PROFILES: { html: true }, FORBID_TAGS: ["style", "form", "input", "button", "iframe"], FORBID_ATTR: ["style", "id", "name"] });
+export function sanitizeArticleHtml(html: string, richText = false): string {
+  const clean = DOMPurify.sanitize(html, { USE_PROFILES: { html: true }, FORBID_TAGS: ["style", "form", "input", "button", "iframe"], FORBID_ATTR: richText ? ["id", "name"] : ["style", "id", "name"] });
   const doc = new DOMParser().parseFromString(clean, "text/html");
+  // Retain only editor formatting, never arbitrary pasted CSS or attributes.
+  doc.querySelectorAll<HTMLElement>("[style]").forEach((node) => {
+    const color = node.style.color;
+    const size = node.style.fontSize;
+    const align = node.style.textAlign;
+    node.removeAttribute("style");
+    if (node.tagName === "SPAN") {
+      if (/^(#[a-f0-9]{3,8}|rgba?\([\d\s.,%]+\)|[a-z]+)$/i.test(color)) node.style.color = color;
+      if (["12px", "14px", "16px", "18px", "20px", "24px", "28px", "32px"].includes(size)) node.style.fontSize = size;
+    }
+    if (/^(P|H[2-6])$/.test(node.tagName) && ["left", "center", "right", "justify"].includes(align)) node.style.textAlign = align;
+  });
+  doc.querySelectorAll("*").forEach((node) => {
+    for (const attr of Array.from(node.attributes)) {
+      if (attr.name.startsWith("data-") || attr.name === "class") node.removeAttribute(attr.name);
+    }
+  });
   doc.querySelectorAll("a[href], img[src]").forEach((node) => {
     const attr = node.tagName === "IMG" ? "src" : "href";
     const value = node.getAttribute(attr) ?? "";
@@ -15,10 +32,31 @@ export function sanitizeArticleHtml(html: string): string {
       if (url.username || url.password) allowed = false;
     } catch { /* remove malformed URLs */ }
     if (!allowed) node.removeAttribute(attr);
-    if (node.tagName === "IMG") { node.setAttribute("loading", "lazy"); node.setAttribute("decoding", "async"); }
+    if (node.tagName === "IMG") {
+      if (!richText || !["25%", "50%", "75%", "100%"].includes(node.getAttribute("width") ?? "")) node.removeAttribute("width");
+      node.removeAttribute("height");
+      node.setAttribute("loading", "lazy"); node.setAttribute("decoding", "async");
+    }
     if (node.tagName === "A") node.setAttribute("rel", "noopener noreferrer");
   });
   return doc.body.innerHTML;
+}
+
+function richTextHtml(content: string): string | null {
+  if (!content.trimStart().startsWith("{")) return null;
+  try {
+    const data = JSON.parse(content);
+    return data?.format === "richtext-v1" && typeof data.html === "string" ? data.html : null;
+  } catch { return null; }
+}
+
+export function articleEditorHtml(content: string): string {
+  const rich = richTextHtml(content);
+  return rich === null ? sanitizeArticleHtml(articleMarked.parse(content) as string) : sanitizeArticleHtml(rich, true);
+}
+
+export function serializeRichText(html: string): string {
+  return JSON.stringify({ format: "richtext-v1", html: sanitizeArticleHtml(html, true) });
 }
 
 // Dedicated marked instance with safety/a11y overrides:
@@ -63,6 +101,28 @@ function bareUrlOf(token: Token): string | null {
 }
 
 export function parseArticle(markdown: string): ArticleSegment[] {
+  const rich = richTextHtml(markdown);
+  if (rich !== null) {
+    const doc = new DOMParser().parseFromString(sanitizeArticleHtml(rich, true), "text/html");
+    const segments: ArticleSegment[] = [];
+    let html = "";
+    for (const node of Array.from(doc.body.childNodes)) {
+      const text = node.textContent?.trim() ?? "";
+      const paragraph = node instanceof HTMLElement && node.tagName === "P";
+      const soleLink = paragraph && node.children.length === 1 && node.firstElementChild?.tagName === "A" && node.firstElementChild.getAttribute("href") === text;
+      if (paragraph && (node.children.length === 0 || soleLink) && /^https?:\/\/\S+$/.test(text)) {
+        if (html) segments.push({ kind: "html", html });
+        html = "";
+        segments.push({ kind: "embed", url: text });
+      } else {
+        const wrapper = doc.createElement("div");
+        wrapper.append(node.cloneNode(true));
+        html += wrapper.innerHTML;
+      }
+    }
+    if (html) segments.push({ kind: "html", html });
+    return segments;
+  }
   const tokens = articleMarked.lexer(markdown);
   // The reflink map lives on the token list; sliced runs need it to render.
   const links = (tokens as { links?: Record<string, unknown> }).links ?? {};

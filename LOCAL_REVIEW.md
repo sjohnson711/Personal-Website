@@ -11,7 +11,7 @@ Captured emails: **http://127.0.0.1:5174/__review/mailbox**.
 
 ## What to review
 
-1. Open **Local image placement test**, then edit it from the admin dashboard. Place the cursor between paragraphs and paste a copied image or an HTTPS URL ending in `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, or `.avif`. Save and reopen it. Images must stay where pasted, and surrounding text must remain intact. Clipboard files are limited to 2 MB; complete article requests to 8 MB. Edit the Markdown image description for alt text.
+1. Open **Local image placement test**, then edit it from the admin dashboard. The content field is a rich text editor with headings, font size, color, bold, italic, underline, lists, alignment, links, and undo/redo. Place the cursor between paragraphs and paste a copied image or an HTTPS URL ending in `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, or `.avif`. Save and reopen it. Images must stay where pasted, and surrounding text must remain intact. Clipboard files are limited to 10 MB; complete article requests to 32 MB. Select an image to change its width or alternative text. Existing Markdown articles convert when edited; public rendering supports both formats.
 2. Sign out and subscribe with a test email. The local mailbox should show the signup alert within approximately 15 seconds, addressed to `samaritanbrotherseth@gmail.com`, with the submitted email and UTC signup time. Submitting the same address again must not generate another alert.
 3. Sign in and open **Site Analytics**. Review the 7/30/90-day selector, daily views, popular pages, sources, devices, interactions, active subscribers, and alert statuses. Test at a narrow phone width; wide tables scroll within their cards. Refresh updates data. Signed-in admin visits are excluded from traffic.
 4. Open a private draft’s public URL after signing out. It must be unavailable. The privacy page explains traffic collection and submitted identities.
@@ -32,6 +32,8 @@ npm run build --workspace frontend
 npm run build --workspace backend
 node frontend/scripts/verify-browser.mjs
 node frontend/scripts/verify-built-site.mjs
+node --import tsx backend/__tests__/article-size-limits.ts
+node frontend/scripts/verify-rich-editor.mjs
 ```
 
 The review uses PostgreSQL 18 installed on this computer, listening only on `127.0.0.1:5433`, with the dedicated database `personal_review`. Integration and migration tests use separate named databases. Local files and screenshots are under ignored `node_modules/.cache/local-review/`. Stop the frontend/API with Ctrl+C. The database can be stopped with:
@@ -41,6 +43,8 @@ The review uses PostgreSQL 18 installed on this computer, listening only on `127
 ```
 
 `--reset-sample` on the review command restores only the demonstration article. The earlier read-only snapshot preview remains available through `preview:local`.
+
+`npm run preview:editor --workspace frontend` starts a database-free editor preview at `http://127.0.0.1:5175/admin/articles/1/edit`. It uses a temporary sample article, keeps edits only in memory, and makes no production requests. `verify-rich-editor.mjs` uses its own in-memory API fixtures and defaults to this preview URL; set `EDITOR_REVIEW_URL` to test another local frontend. The focused checks cover legacy content, formatting, image-read failure recovery, a 7 MB image saved in an article above the former 8 MB request cap, the 10 MB file cap, and mobile layout.
 
 ## Completed implementation
 
