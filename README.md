@@ -203,45 +203,6 @@ All endpoints return `application/json`. Auth endpoints use httpOnly cookies (XS
 - **PostgreSQL** (local) or **Neon account** (cloud)
 - **npm** 9+
 
-### Local Development
-
-1. **Clone & install:**
-   ```bash
-   git clone https://github.com/sjohnson711/Personal-Website.git
-   cd Blog_Site
-   npm install
-   ```
-
-2. **Setup database:**
-   ```bash
-   cd backend
-   npm run db:push    # Apply migrations
-   npm run db:seed    # Create admin + sample articles
-   ```
-
-3. **Configure environment** (`backend/.env`):
-   ```env
-   DATABASE_URL="postgresql://user:password@localhost:5432/book_site"
-   JWT_SECRET="your-secret-key-here"
-   PORT=3001
-   FRONTEND_URL="http://localhost:5173"
-   RESEND_API_KEY="re_..."
-   ```
-
-4. **Start servers:**
-   ```bash
-   # Terminal 1
-   cd backend && npm run dev     # http://localhost:3001
-   
-   # Terminal 2
-   cd frontend && npm run dev    # http://localhost:5173
-   ```
-
-5. **Login at** `http://localhost:5173/gateway`
-   - Email: `admin@yoursite.com`
-   - Password: (from seed, or `ADMIN_PASSWORD` env var)
-
----
 
 ## 📦 Production Deployment
 
@@ -429,11 +390,10 @@ MIT — Feel free to use as template or reference for interviews.
 
 ## 👨‍💼 Author
 
-**Seth Johnson** — Full-stack engineer focused on scalable systems and production deployments.
+**Seth Johnson** — Security Software Engineer focused on scalable systems, security best practices, and production deployments.
 
 - **GitHub:** [sjohnson711](https://github.com/sjohnson711)
 - **LinkedIn:** [Seth Johnson]([https://linkedin.com/in/seth-johnson](https://www.linkedin.com/in/seth-johnson-10a6a217b/))
-- **Live Demo:** [personal-website-kgm3-6in28es7v-seths-projects-4bb15efa.vercel.app](https://personal-website-kgm3-6in28es7v-seths-projects-4bb15efa.vercel.app)
 
 ---
 
