@@ -11,7 +11,7 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 const errors = [];
 let restore = null;
 page.on("pageerror", (error) => errors.push(error.message));
-const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=";
+const png = await page.evaluate(() => { const canvas = document.createElement("canvas"); canvas.width = 8; canvas.height = 8; const context = canvas.getContext("2d"); context.fillStyle = "#7a5c10"; context.fillRect(0, 0, 8, 8); return canvas.toDataURL("image/png").split(",")[1]; });
 await page.route("https://images.example.test/photo.png", (route) => route.fulfill({ contentType: "image/png", body: Buffer.from(png, "base64") }));
 try {
   await page.goto(base + "/admin/analytics"); await page.waitForURL("**/gateway");
@@ -24,6 +24,11 @@ try {
   await page.getByRole("combobox").selectOption("7");
   await page.waitForFunction(() => document.querySelectorAll(".traffic-chart > div").length === 7);
   await page.setViewportSize({ width: 390, height: 844 });
+  for (const days of [7, 30, 90]) {
+    await page.getByRole("combobox").selectOption(String(days));
+    await page.waitForFunction((days) => document.querySelectorAll(".traffic-chart > div").length === days, days);
+    await page.waitForFunction(() => document.documentElement.scrollWidth <= innerWidth);
+  }
   await page.screenshot({ path: resolve(output, "analytics-mobile.png") });
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "Mobile analytics must not overflow");
   await page.getByRole("heading", { name: "Recent interactions" }).scrollIntoViewIfNeeded();
@@ -55,6 +60,8 @@ try {
   await page.goto(`${base}/admin/articles/${article.id}/edit`); await area.waitFor(); assert.equal(await area.inputValue(), saved);
   await page.goto(base + "/articles/local-image-test"); await page.locator(".prose-ink img").first().waitFor();
   assert.equal(await page.locator(".prose-ink img").count(), (saved.match(/!\[[^\]]*\]/g) ?? []).length);
+  for (const img of await page.locator(".prose-ink img").all()) await img.scrollIntoViewIfNeeded();
+  await page.waitForFunction(() => Array.from(document.querySelectorAll(".prose-ink img")).every((img) => img.complete && img.naturalWidth > 0));
   await page.screenshot({ path: resolve(output, "article-mobile.png"), fullPage: true });
   await page.evaluate(async () => { await fetch("/api/auth/logout", { method: "POST", headers: { "Content-Type": "application/json", "X-Requested-With": "PersonalWebsite" }, body: "{}" }); });
   await page.goto(base + "/");

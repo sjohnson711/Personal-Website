@@ -134,6 +134,11 @@ async function main() {
     assert.equal(reopened.content, large.content); check("image articles above the former 100 KB limit save/reopen without reordering");
     assert.equal((await request("/articles", "POST", large)).status, 401);
     assert.equal((await request("/articles", "POST", { ...large, slug: "123" }, true)).status, 400); check("large writes authenticate before parsing; numeric-only slug collisions prevented");
+    assert.equal((await request(`/articles/${savedArticle.id}`, "DELETE", undefined, true)).status, 200);
+    assert.equal((await request(`/articles/${savedArticle.id}`, "GET", undefined, true)).status, 404);
+    const logout = await request("/auth/logout", "POST", undefined, true);
+    assert.equal(logout.status, 200); assert.match(logout.headers.get("set-cookie")!, /Expires=Thu, 01 Jan 1970/);
+    check("bodyless authenticated delete and logout preserve CSRF protection and cookie clearing");
     for (const [url, provider] of [["https://www.youtube.com/watch?v=dQw4w9WgXcQ", "YouTube"], ["https://vimeo.com/123456789", "Vimeo"], ["https://open.spotify.com/track/abc123", "Spotify"]]) {
       const embed = await request(`/embed?url=${encodeURIComponent(url)}`);
       assert.equal(embed.status, 200); assert.equal((await embed.json() as any).provider, provider);

@@ -11,7 +11,9 @@ export function allowedOrigins(): string[] {
 // The token-bearing unsubscribe GET is the only public write exception.
 export const csrfProtection: RequestHandler = (req, res, next) => {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
-  if (!allowedOrigins().includes(req.get("Origin") ?? "") || req.get("X-Requested-With") !== "PersonalWebsite" || !req.is("application/json")) {
+  // req.is() returns null for bodyless DELETE/logout requests even with a valid header.
+  const contentType = req.get("Content-Type")?.split(";")[0].trim().toLowerCase();
+  if (!allowedOrigins().includes(req.get("Origin") ?? "") || req.get("X-Requested-With") !== "PersonalWebsite" || contentType !== "application/json") {
     res.status(403).json({ error: "Request origin or security header is invalid" }); return;
   }
   next();
